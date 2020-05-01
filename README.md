@@ -104,8 +104,8 @@ void loop()
 
 - `std::map`
 - `std::unordered_map`
-- std::multimap
-- std::unordered_multimap
+- `std::multimap` *
+- `std::unordered_multimap` *
 
 ### Ext
 
