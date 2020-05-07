@@ -49,6 +49,7 @@ Others are automatically enabled/disabled depending on compiler.
 
 #### for utility
 
+- `std::numeric_limits` (only `max()` and `min()` now)
 - `std::tuple`
 - `std::get`
 - `std::tuple_size`

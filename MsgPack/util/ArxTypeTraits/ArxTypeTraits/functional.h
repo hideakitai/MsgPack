@@ -4,20 +4,14 @@
 #define ARX_TYPE_TRAITS_FUNCTIONAL_H
 
 #include <Arduino.h>
+#include <new.h>
 
 #ifdef ARX_TYPE_TRAITS_DISABLED
-
-void * operator new(size_t size, void * ptr) { (void)size; return ptr; }
 
 namespace std {
 
     // functional-avr
     // https://github.com/winterscar/functional-avr
-
-    namespace detail
-    {
-        // void * operator new(size_t size, void * ptr) { return ptr; }
-    }
 
     template<size_t size, size_t align>
     struct alignas(align) aligned_storage_t
