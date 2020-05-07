@@ -84,10 +84,6 @@ namespace msgpack {
         // adaptation of types to msgpack
         // https://github.com/msgpack/msgpack-c/wiki/v2_0_cpp_adaptor
 
-        // template <typename T>
-        // void unpack(T& value)
-        // {
-        // }
 
         // ---------- NIL format family ----------
         // - N/A
