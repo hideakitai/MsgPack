@@ -29,13 +29,15 @@ namespace ht {
 namespace serial {
 namespace msgpack {
 
+#ifdef HT_SERIAL_MSGPACK_DISABLE_STL
+    using Buffer = arx::vector<uint8_t, MSGPACK_PACKER_MAX_BUFFER_BYTE_SIZE>;
+#else
+    using Buffer = std::vector<uint8_t>;
+#endif
+
     class Packer
     {
-#ifdef HT_SERIAL_MSGPACK_DISABLE_STL
-        ArxRingBuffer<uint8_t, 128> buffer;
-#else
-        std::vector<uint8_t> buffer;
-#endif
+        Buffer buffer;
 
     public:
 
@@ -477,8 +479,12 @@ namespace msgpack {
 
         void packFloat64(const double value)
         {
+#ifndef HT_SERIAL_MSGPACK_DISABLE_STL
             packRawByte(Type::FLOAT64);
             packRawReversed(value);
+#else
+            packFloat32(value); // Uno, etc. does not support double
+#endif // HT_SERIAL_MSGPACK_DISABLE_STL
         }
 
 

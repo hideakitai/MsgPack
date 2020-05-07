@@ -30,12 +30,20 @@ namespace ht {
 namespace serial {
 namespace msgpack {
 
+#ifdef HT_SERIAL_MSGPACK_DISABLE_STL
+    using IndicesType = arx::vector<size_t, MSGPACK_UNPACKER_MAX_INDICES_SIZE>;
+    using namespace arx;
+#else
+    using IndicesType = std::vector<size_t>;
+    using namespace std;
+#endif // HT_SERIAL_MSGPACK_DISABLE_STL
+
     class Unpacker
     {
         // TODO: check if data structure is closed
 
         uint8_t* raw_data {nullptr};
-        std::vector<size_t> indices;
+        IndicesType indices;
         size_t curr_index {0};
         bool b_decoded {false};
 
@@ -63,11 +71,11 @@ namespace msgpack {
         {
             decodeTo(std::make_index_sequence<sizeof...(Ts)>(), t);
         }
-        template <typename... Ts, std::size_t... Is>
+        template <typename... Ts, size_t... Is>
         void decodeTo(std::index_sequence<Is...>&&, std::tuple<Ts...>& t)
         {
-            std::size_t i {0};
-            std::vector<size_t> {(unpack(std::get<Is>(t)), i++)...};
+            size_t i {0};
+            IndicesType {(unpack(std::get<Is>(t)), i++)...};
         }
         void decodeTo() {}
 
@@ -217,6 +225,8 @@ namespace msgpack {
         // - std::array<char>
         // - std::array<unsigned char>
 
+#ifndef HT_SERIAL_MSGPACK_DISABLE_STL
+
         template <typename T>
         auto unpack(std::vector<T>& bin)
         -> typename std::enable_if<
@@ -237,6 +247,8 @@ namespace msgpack {
             bin = unpackBinary<T, N>();
         }
 
+#endif // HT_SERIAL_MSGPACK_DISABLE_STL
+
 
         // ---------- ARRAY format family ----------
         // - T[]
@@ -251,6 +263,8 @@ namespace msgpack {
         // - std::unordered_set
         // - std::multiset
         // - std::unordered_multiset
+
+#ifndef HT_SERIAL_MSGPACK_DISABLE_STL
 
         template <typename T>
         auto unpack(std::vector<T>& arr)
@@ -378,12 +392,16 @@ namespace msgpack {
             unpackArrayContainerSet(arr);
         }
 
+#endif // HT_SERIAL_MSGPACK_DISABLE_STL
+
 
         // ---------- MAP format family ----------
         // - std::map
         // - std::unordered_map
         // - std::multimap
         // - std::unordered_multimap
+
+#ifndef HT_SERIAL_MSGPACK_DISABLE_STL
 
         template <typename T, typename U>
         void unpack(std::map<T, U>& mp)
@@ -408,6 +426,8 @@ namespace msgpack {
         {
             unpackMapContainer(mp);
         }
+
+#endif // HT_SERIAL_MSGPACK_DISABLE_STL
 
 
         // ---------- EXT format family ----------
@@ -522,9 +542,13 @@ namespace msgpack {
 
         double unpackFloat64()
         {
+#ifndef HT_SERIAL_MSGPACK_DISABLE_STL
             double ret = (getType() == Type::FLOAT64) ? getRawBytes<double>(curr_index, 1) : 0;
             ++curr_index;
             return ret;
+#else
+            return unpackFloat32(); // Uno, etc. does not support double
+#endif // HT_SERIAL_MSGPACK_DISABLE_STL
         }
 
         // ---------- STR format family ----------
@@ -578,6 +602,8 @@ namespace msgpack {
         }
 
         // ---------- BIN format family ----------
+
+#ifndef HT_SERIAL_MSGPACK_DISABLE_STL
 
         template <typename T = uint8_t>
         auto unpackBinary()
@@ -718,6 +744,8 @@ namespace msgpack {
             ++curr_index;
             return data;
         }
+
+#endif // HT_SERIAL_MSGPACK_DISABLE_STL
 
 
         // ---------- ARRAY format family ----------
@@ -880,6 +908,8 @@ namespace msgpack {
         // - std::array<char>
         // - std::array<unsigned char>
 
+#ifndef HT_SERIAL_MSGPACK_DISABLE_STL
+
         template <typename T = uint8_t>
         auto unpackable(const std::vector<T>& bin) const
         -> typename std::enable_if<
@@ -906,6 +936,8 @@ namespace msgpack {
             return ((type == Type::BIN8) || (type == Type::BIN16) || (type == Type::BIN32));
         }
 
+#endif // HT_SERIAL_MSGPACK_DISABLE_STL
+
 
         // ---------- ARRAY format family ----------
         // - T[]
@@ -920,6 +952,8 @@ namespace msgpack {
         // - std::unordered_set
         // - std::multiset
         // - std::unordered_multiset
+
+#ifndef HT_SERIAL_MSGPACK_DISABLE_STL
 
         template <typename T>
         auto unpackable(const std::vector<T>& arr) const
@@ -1013,12 +1047,16 @@ namespace msgpack {
             return ((type == Type::ARRAY4) || (type == Type::ARRAY16) || (type == Type::ARRAY32));
         }
 
+#endif // HT_SERIAL_MSGPACK_DISABLE_STL
+
 
         // ---------- MAP format family ----------
         // - std::map
         // - std::unordered_map
         // - std::multimap
         // - std::unordered_multimap
+
+#ifndef HT_SERIAL_MSGPACK_DISABLE_STL
 
         template <typename T, typename U>
         bool unpackable(const std::map<T, U>& mp) const
@@ -1051,6 +1089,8 @@ namespace msgpack {
             Type type = getType();
             return ((type == Type::MAP4) || (type == Type::MAP16) || (type == Type::MAP32));
         }
+
+#endif // HT_SERIAL_MSGPACK_DISABLE_STL
 
 
         // ---------- EXT format family ----------
@@ -1258,7 +1298,7 @@ private:
                     T t; U u;
                     unpack(t);
                     unpack(u);
-                    mp.emplace(std::make_pair(t, u));
+                    mp.emplace(make_pair(t, u));
                 }
             }
         }
