@@ -126,9 +126,42 @@ C-style array and pointers are supported only packing.
 For unpacking, please use `std::vector<T>` or `std::array<T, N>`.
 `unordered_xxx` are not supported in Arduino.
 
+## Other Options
+
+### Packet Data Storage Class Inside
+
+STL is used to handle packet data by default, but for following boards/architectures, [ArxContainer](https://github.com/hideakitai/ArxContainer) is used to store the packet data because STL can not be used for such boards.
+The storage size of such boards for max packet binary size and number of msgpack objects are limited.
+
+- AVR
+- megaAVR
+- SAMD
+- SPRESENSE
+
+
+### Memory Management (for NO-STL Boards)
+
+As mentioned above, for such boards like Arduino Uno, the storage sizes are limited.
+And of course you can manage them.
+
+``` C++
+// msgpack serialized binary size
+#define MSGPACK_PACKER_MAX_BUFFER_BYTE_SIZE 256 // default: 128
+// msgpack objects size
+#define MSGPACK_UNPACKER_MAX_INDICES_SIZE 32    // default: 16
+```
+
+These macros have no effect for STL enabled boards.
+
+
+## Embedded Libraries
+
+- [ArxTypeTraits v0.1.1](https://github.com/hideakitai/ArxTypeTraits)
+- [ArxContainer v0.3.0](https://github.com/hideakitai/ArxContainer)
+- [TeensyDirtySTLErrorSolution v0.1.0](https://github.com/hideakitai/TeensyDirtySTLErrorSolution)
+
 ## TODO
 
-- support for NO-STL Arduino boards is WIP
 - suport EXT format and custom class
 - suport Timestamp format
 
