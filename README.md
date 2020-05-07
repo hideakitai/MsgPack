@@ -154,16 +154,34 @@ And of course you can manage them.
 These macros have no effect for STL enabled boards.
 
 
+### STL library for Arduino Support
+
+For such boards, there are several STL libraries, like [ArduinoSTL](https://github.com/mike-matera/ArduinoSTL), [StandardCPlusPlus](https://github.com/maniacbug/StandardCplusplus), and so on.
+But such libraries are mainly based on [uClibc++](https://cxx.uclibc.org/) and it has many lack of function.
+I considered to support them but I won't support them unless uClibc++ becomes much better compatibility to standard C++ library.
+I reccomend to use low cost but much better performance chip like ESP series.
+
+
 ## Embedded Libraries
 
 - [ArxTypeTraits v0.1.1](https://github.com/hideakitai/ArxTypeTraits)
 - [ArxContainer v0.3.0](https://github.com/hideakitai/ArxContainer)
 - [TeensyDirtySTLErrorSolution v0.1.0](https://github.com/hideakitai/TeensyDirtySTLErrorSolution)
 
+
 ## TODO
 
 - suport EXT format and custom class
 - suport Timestamp format
+
+
+## Reference
+
+- [MessagePack Specification](https://github.com/msgpack/msgpack/blob/master/spec.md)
+- [msgpack adaptor](https://github.com/msgpack/msgpack-c/wiki/v2_0_cpp_adaptor)
+- [msgpack object](https://github.com/msgpack/msgpack-c/wiki/v2_0_cpp_object)
+- [msgpack-c wiki](https://github.com/msgpack/msgpack-c/wiki)
+
 
 ## License
 
