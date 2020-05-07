@@ -6,7 +6,6 @@
 #include "util/ArxTypeTraits/ArxTypeTraits.h"
 #ifdef HT_SERIAL_MSGPACK_DISABLE_STL
     #include "util/ArxContainer/ArxContainer.h"
-    #include "util/ArxSmartPtr/ArxSmartPtr.h"
     // #include <ArduinoSTL.h>
 #else
     #include <vector>
@@ -20,7 +19,6 @@
     #include <map>
     #include <unordered_map>
     #include <limits>
-    #include <memory>
 #endif // HT_SERIAL_MSGPACK_DISABLE_STL
 #ifdef TEENSYDUINO
     #include "util/TeensyDirtySTLErrorSolution/TeensyDirtySTLErrorSolution.h"

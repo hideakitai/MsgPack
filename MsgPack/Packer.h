@@ -5,7 +5,7 @@
 #include "util/ArxTypeTraits/ArxTypeTraits.h"
 #ifdef HT_SERIAL_MSGPACK_DISABLE_STL
     #include "util/ArxContainer/ArxContainer.h"
-    #include <ArduinoSTL.h>
+    // #include <ArduinoSTL.h>
 #else
     #include <vector>
     #include <array>
@@ -377,7 +377,7 @@ namespace msgpack {
         {
             packMapContainer(mp);
         }
-        
+
 
 #endif // HT_SERIAL_MSGPACK_DISABLE_STL
 
