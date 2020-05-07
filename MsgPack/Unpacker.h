@@ -3,9 +3,29 @@
 #ifndef HT_SERIAL_MSGPACK_UNPACKER_H
 #define HT_SERIAL_MSGPACK_UNPACKER_H
 
-#include <memory>
-#include <vector>
-#include "util/ArxTypeTraits.h"
+#include "util/ArxTypeTraits/ArxTypeTraits.h"
+#ifdef HT_SERIAL_MSGPACK_DISABLE_STL
+    #include "util/ArxContainer/ArxContainer.h"
+    #include "util/ArxSmartPtr/ArxSmartPtr.h"
+    // #include <ArduinoSTL.h>
+#else
+    #include <vector>
+    #include <array>
+    #include <deque>
+    #include <tuple>
+    #include <list>
+    #include <forward_list>
+    #include <set>
+    #include <unordered_set>
+    #include <map>
+    #include <unordered_map>
+    #include <limits>
+    #include <memory>
+#endif // HT_SERIAL_MSGPACK_DISABLE_STL
+#ifdef TEENSYDUINO
+    #include "util/TeensyDirtySTLErrorSolution/TeensyDirtySTLErrorSolution.h"
+#endif // TEENSYDUINO
+
 #include "Types.h"
 
 namespace ht {
@@ -41,10 +61,10 @@ namespace msgpack {
         template <typename... Ts>
         void decodeTo(std::tuple<Ts...>& t)
         {
-            decodeTo(arx::make_index_sequence<sizeof...(Ts)>(), t);
+            decodeTo(std::make_index_sequence<sizeof...(Ts)>(), t);
         }
         template <typename... Ts, std::size_t... Is>
-        void decodeTo(arx::index_sequence<Is...>&&, std::tuple<Ts...>& t)
+        void decodeTo(std::index_sequence<Is...>&&, std::tuple<Ts...>& t)
         {
             std::size_t i {0};
             std::vector<size_t> {(unpack(std::get<Is>(t)), i++)...};

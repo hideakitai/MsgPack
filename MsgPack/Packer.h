@@ -2,9 +2,9 @@
 #ifndef HT_SERIAL_MSGPACK_PACKER_H
 #define HT_SERIAL_MSGPACK_PACKER_H
 
+#include "util/ArxTypeTraits/ArxTypeTraits.h"
 #ifdef HT_SERIAL_MSGPACK_DISABLE_STL
-    #include "util/ArxTypeTraits.h"
-    #include "util/ArxRingBuffer.h"
+    #include "util/ArxContainer/ArxContainer.h"
     #include <ArduinoSTL.h>
 #else
     #include <vector>
@@ -18,10 +18,10 @@
     #include <map>
     #include <unordered_map>
     #include <limits>
-#ifdef TEENSYDUINO
-    #include "util/TeensyDirtySTLErrorSolution.h"
-#endif // TEENSYDUINO
 #endif // HT_SERIAL_MSGPACK_DISABLE_STL
+#ifdef TEENSYDUINO
+    #include "util/TeensyDirtySTLErrorSolution/TeensyDirtySTLErrorSolution.h"
+#endif // TEENSYDUINO
 
 #include "Types.h"
 
