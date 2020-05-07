@@ -75,7 +75,10 @@ namespace msgpack {
 
         template <typename T>
         auto pack(const T& n)
-        -> typename std::enable_if<std::is_same<T, object::NIL>::value>::type
+        -> typename std::enable_if<
+            std::is_same<T, object::NIL>::value ||
+            std::is_same<T, std::nullptr_t>::value
+        >::type
         {
             (void)n;
             packNil();
@@ -104,7 +107,7 @@ namespace msgpack {
             !std::is_floating_point<T>::value &&
             !std::is_same<T, bool>::value &&
             !std::is_same<typename std::remove_cv<T>::type, char*>::value &&
-            !std::is_signed<T>::value
+            std::is_unsigned<T>::value
         >::type
         {
             size_t size = sizeof(T);
@@ -260,8 +263,7 @@ namespace msgpack {
             !std::is_same<T, unsigned char>::value
         >::type
         {
-            packArraySize(arr.size());
-            for (const auto& a : arr) pack(a);
+            packArrayContainer(arr);
         }
 
         template <typename T, size_t N>
@@ -271,15 +273,13 @@ namespace msgpack {
             !std::is_same<T, unsigned char>::value
         >::type
         {
-            packArraySize(arr.size());
-            for (const auto& a : arr) pack(a);
+            packArrayContainer(arr);
         }
 
         template <typename T>
         void pack(const std::deque<T>& arr)
         {
-            packArraySize(arr.size());
-            for (const auto& a : arr) pack(a);
+            packArrayContainer(arr);
         }
 
         template <typename T, typename U>
@@ -308,8 +308,7 @@ namespace msgpack {
         template <typename T>
         void pack(const std::list<T>& arr)
         {
-            packArraySize(arr.size());
-            for (const auto& a : arr) pack(a);
+            packArrayContainer(arr);
         }
 
         template <typename T>
@@ -323,29 +322,25 @@ namespace msgpack {
         template <typename T>
         void pack(const std::set<T>& arr)
         {
-            packArraySize(arr.size());
-            for (const auto& a : arr) pack(a);
+            packArrayContainer(arr);
         }
 
         template <typename T>
         void pack(const std::unordered_set<T>& arr)
         {
-            packArraySize(arr.size());
-            for (const auto& a : arr) pack(a);
+            packArrayContainer(arr);
         }
 
         template <typename T>
         void pack(const std::multiset<T>& arr)
         {
-            packArraySize(arr.size());
-            for (const auto& a : arr) pack(a);
+            packArrayContainer(arr);
         }
 
         template <typename T>
         void pack(const std::unordered_multiset<T>& arr)
         {
-            packArraySize(arr.size());
-            for (const auto& a : arr) pack(a);
+            packArrayContainer(arr);
         }
 
 #endif // HT_SERIAL_MSGPACK_DISABLE_STL
@@ -360,48 +355,29 @@ namespace msgpack {
 #ifndef HT_SERIAL_MSGPACK_DISABLE_STL
 
         template <typename T, typename U>
-        void pack(const std::map<T, U>& arr)
+        void pack(const std::map<T, U>& mp)
         {
-            packMapSize(arr.size());
-            for (const auto& a : arr)
-            {
-                pack(a.first);
-                pack(a.second);
-            }
+            packMapContainer(mp);
         }
 
         template <typename T, typename U>
-        void pack(const std::unordered_map<T, U>& arr)
+        void pack(const std::unordered_map<T, U>& mp)
         {
-            packMapSize(arr.size());
-            for (const auto& a : arr)
-            {
-                pack(a.first);
-                pack(a.second);
-            }
+            packMapContainer(mp);
         }
 
         template <typename T, typename U>
-        void pack(const std::multimap<T, U>& arr)
+        void pack(const std::multimap<T, U>& mp)
         {
-            packMapSize(arr.size());
-            for (const auto& a : arr)
-            {
-                pack(a.first);
-                pack(a.second);
-            }
+            packMapContainer(mp);
         }
 
         template <typename T, typename U>
-        void pack(const std::unordered_multimap<T, U>& arr)
+        void pack(const std::unordered_multimap<T, U>& mp)
         {
-            packMapSize(arr.size());
-            for (const auto& a : arr)
-            {
-                pack(a.first);
-                pack(a.second);
-            }
+            packMapContainer(mp);
         }
+        
 
 #endif // HT_SERIAL_MSGPACK_DISABLE_STL
 
@@ -762,6 +738,23 @@ namespace msgpack {
             }
         }
 
+        template <typename A>
+        void packArrayContainer(const A& arr)
+        {
+            packArraySize(arr.size());
+            for (const auto& a : arr) pack(a);
+        }
+
+        template <typename M>
+        void packMapContainer(const M& mp)
+        {
+            packMapSize(mp.size());
+            for (const auto& m : mp)
+            {
+                pack(m.first);
+                pack(m.second);
+            }
+        }
     };
 
 } // namespace msgpack

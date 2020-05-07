@@ -262,28 +262,8 @@ namespace msgpack {
             !std::is_same<T, uint8_t>::value
         >::type
         {
-            const size_t size = unpackArraySize();
-            if (arr.size() == size)
-            {
-                for (auto& a : arr)
-                {
-                    unpack(a);
-                }
-            }
-            else if (size == 0)
-            {
-                // TODO: error handling
-            }
-            else
-            {
-                arr.clear();
-                for (size_t a = 0; a < size; ++a)
-                {
-                    arr.emplace_back(T());
-                    unpack(arr.back());
-                }
-                arr.shrink_to_fit();
-            }
+            unpackArrayContainerArray(arr);
+            arr.shrink_to_fit();
         }
 
         template <typename T, size_t N>
@@ -310,28 +290,8 @@ namespace msgpack {
         template <typename T>
         void unpack(std::deque<T>& arr)
         {
-            const size_t size = unpackArraySize();
-            if (arr.size() == size)
-            {
-                for (auto& a : arr)
-                {
-                    unpack(a);
-                }
-            }
-            else if (size == 0)
-            {
-                // TODO: error handling
-            }
-            else
-            {
-                arr.clear();
-                for (size_t a = 0; a < size; ++a)
-                {
-                    arr.emplace_back(T());
-                    unpack(arr.back());
-                }
-                arr.shrink_to_fit();
-            }
+            unpackArrayContainerArray(arr);
+            arr.shrink_to_fit();
         }
 
         template <typename T, typename U>
@@ -366,27 +326,7 @@ namespace msgpack {
         template <typename T>
         void unpack(std::list<T>& arr)
         {
-            const size_t size = unpackArraySize();
-            if (arr.size() == size)
-            {
-                for (auto& p : arr)
-                {
-                    unpack(p);
-                }
-            }
-            else if (size == 0)
-            {
-                // TODO: error handling
-            }
-            else
-            {
-                arr.clear();
-                for (size_t a = 0; a < size; ++a)
-                {
-                    arr.emplace_back(T());
-                    unpack(arr.back());
-                }
-            }
+            unpackArrayContainerArray(arr);
         }
 
         template <typename T>
@@ -420,81 +360,25 @@ namespace msgpack {
         template <typename T>
         void unpack(std::set<T>& arr)
         {
-            const size_t size = unpackArraySize();
-            if (size == 0)
-            {
-                // TODO: error handling
-            }
-            else
-            {
-                arr.clear();
-                for (size_t a = 0; a < size; ++a)
-                {
-                    T t;
-                    unpack(t);
-                    arr.emplace(t);
-                }
-            }
+            unpackArrayContainerSet(arr);
         }
 
         template <typename T>
         void unpack(std::unordered_set<T>& arr)
         {
-            const size_t size = unpackArraySize();
-            if (size == 0)
-            {
-                // TODO: error handling
-            }
-            else
-            {
-                arr.clear();
-                for (size_t a = 0; a < size; ++a)
-                {
-                    T t;
-                    unpack(t);
-                    arr.emplace(t);
-                }
-            }
+            unpackArrayContainerSet(arr);
         }
 
         template <typename T>
         void unpack(std::multiset<T>& arr)
         {
-            const size_t size = unpackArraySize();
-            if (size == 0)
-            {
-                // TODO: error handling
-            }
-            else
-            {
-                arr.clear();
-                for (size_t a = 0; a < size; ++a)
-                {
-                    T t;
-                    unpack(t);
-                    arr.emplace(t);
-                }
-            }
+            unpackArrayContainerSet(arr);
         }
 
         template <typename T>
         void unpack(std::unordered_multiset<T>& arr)
         {
-            const size_t size = unpackArraySize();
-            if (size == 0)
-            {
-                // TODO: error handling
-            }
-            else
-            {
-                arr.clear();
-                for (size_t a = 0; a < size; ++a)
-                {
-                    T t;
-                    unpack(t);
-                    arr.emplace(t);
-                }
-            }
+            unpackArrayContainerSet(arr);
         }
 
 
@@ -507,85 +391,25 @@ namespace msgpack {
         template <typename T, typename U>
         void unpack(std::map<T, U>& mp)
         {
-            const size_t size = unpackMapSize();
-            if (size == 0)
-            {
-                // TODO: error handling
-            }
-            else
-            {
-                mp.clear();
-                for (size_t a = 0; a < size; ++a)
-                {
-                    T t; U u;
-                    unpack(t);
-                    unpack(u);
-                    mp.emplace(std::make_pair(t, u));
-                }
-            }
+            unpackMapContainer(mp);
         }
 
         template <typename T, typename U>
         void unpack(std::unordered_map<T, U>& mp)
         {
-            const size_t size = unpackMapSize();
-            if (size == 0)
-            {
-                // TODO: error handling
-            }
-            else
-            {
-                mp.clear();
-                for (size_t a = 0; a < size; ++a)
-                {
-                    T t; U u;
-                    unpack(t);
-                    unpack(u);
-                    mp.emplace(std::make_pair(t, u));
-                }
-            }
+            unpackMapContainer(mp);
         }
 
         template <typename T, typename U>
         void unpack(std::multimap<T, U>& mp)
         {
-            const size_t size = unpackMapSize();
-            if (size == 0)
-            {
-                // TODO: error handling
-            }
-            else
-            {
-                mp.clear();
-                for (size_t a = 0; a < size; ++a)
-                {
-                    T t; U u;
-                    unpack(t);
-                    unpack(u);
-                    mp.emplace(std::make_pair(t, u));
-                }
-            }
+            unpackMapContainer(mp);
         }
 
         template <typename T, typename U>
         void unpack(std::unordered_multimap<T, U>& mp)
         {
-            const size_t size = unpackMapSize();
-            if (size == 0)
-            {
-                // TODO: error handling
-            }
-            else
-            {
-                mp.clear();
-                for (size_t a = 0; a < size; ++a)
-                {
-                    T t; U u;
-                    unpack(t);
-                    unpack(u);
-                    mp.emplace(std::make_pair(t, u));
-                }
-            }
+            unpackMapContainer(mp);
         }
 
 
@@ -1372,6 +1196,73 @@ private:
                     return (size_t)getRawBytes<uint32_t>(i, 1) + sizeof(uint32_t) + 1 + 1;
                 default:
                     return 0;
+            }
+        }
+
+        template <template <typename...> class C, class T>
+        void unpackArrayContainerArray(C<T>& arr)
+        {
+            const size_t size = unpackArraySize();
+            if (arr.size() == size)
+            {
+                for (auto& a : arr)
+                {
+                    unpack(a);
+                }
+            }
+            else if (size == 0)
+            {
+                // TODO: error handling
+            }
+            else
+            {
+                arr.clear();
+                for (size_t a = 0; a < size; ++a)
+                {
+                    arr.emplace_back(T());
+                    unpack(arr.back());
+                }
+            }
+        }
+
+        template <template <typename...> class C, class T>
+        void unpackArrayContainerSet(C<T>& arr)
+        {
+            const size_t size = unpackArraySize();
+            if (size == 0)
+            {
+                // TODO: error handling
+            }
+            else
+            {
+                arr.clear();
+                for (size_t a = 0; a < size; ++a)
+                {
+                    T t;
+                    unpack(t);
+                    arr.emplace(t);
+                }
+            }
+        }
+
+        template <template <typename...> class C, class T, class U>
+        void unpackMapContainer(C<T, U>& mp)
+        {
+            const size_t size = unpackMapSize();
+            if (size == 0)
+            {
+                // TODO: error handling
+            }
+            else
+            {
+                mp.clear();
+                for (size_t a = 0; a < size; ++a)
+                {
+                    T t; U u;
+                    unpack(t);
+                    unpack(u);
+                    mp.emplace(std::make_pair(t, u));
+                }
             }
         }
 
