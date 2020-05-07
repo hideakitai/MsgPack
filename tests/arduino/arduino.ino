@@ -97,7 +97,7 @@ void setup()
         std::multimap<String, int> mm {{"1", 1}, {"2", 2}, {"3", 3}, {"4", 4}, {"5", 5}};
         // std::unordered_multimap<String, int> umm {{"1", 1}, {"2", 2}, {"3", 3}, {"4", 4}, {"5", 5}};
 
-        MsgPacker packer;
+        MsgPack::Packer packer;
         packer.encode(
             b1, b2,
             i5, u7, i8, i16, i32, i64, u8, u16, u32, u64,
@@ -167,7 +167,7 @@ void setup()
         std::multimap<String, int> r_mm;
         // std::unordered_multimap<String, int> r_umm;
 
-        MsgUnpacker unpacker;
+        MsgPack::Unpacker unpacker;
         unpacker.feed(packer.data(), packer.size());
 
         unpacker.decode(
