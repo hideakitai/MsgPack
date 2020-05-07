@@ -39,6 +39,7 @@ namespace msgpack {
         uint8_t* raw_data {nullptr};
         std::vector<size_t> indices;
         size_t curr_index {0};
+        bool b_decoded {false};
 
     public:
 
@@ -47,7 +48,8 @@ namespace msgpack {
             raw_data = (uint8_t*)data;
             for (size_t i = 0; i < size; i += getElementSize(indices.size() - 1))
                 indices.emplace_back(i);
-            return (size == (indices.back() + getElementSize(indices.size() - 1)));
+            b_decoded = (size == (indices.back() + getElementSize(indices.size() - 1)));
+            return b_decoded;
         }
 
         template <typename First, typename ...Rest>
@@ -71,6 +73,7 @@ namespace msgpack {
         }
         void decodeTo() {}
 
+        bool available() const { return b_decoded; }
         size_t size() const { return indices.size(); }
         void index(const size_t i) { curr_index = i; }
         size_t index() const { return curr_index; }
