@@ -359,6 +359,26 @@ namespace std {
     template<class Sig>
     using result_of = details::result_of<Sig>;
 
+
+#ifndef ARX_TYPE_TRAITS_INITIALIZER_LIST_DEFINED
+#define ARX_TYPE_TRAITS_INITIALIZER_LIST_DEFINED
+
+    template<class T>
+    class initializer_list
+    {
+    private:
+        const T* array;
+        size_t len;
+        initializer_list(const T* a, size_t l) : array(a), len(l) {}
+    public:
+        initializer_list() : array(nullptr), len(0) {}
+        size_t size() const { return len; }
+        const T *begin() const { return array; }
+        const T *end() const { return array + len; }
+    };
+
+#endif // ARX_TYPE_TRAITS_INITIALIZER_LIST_DEFINED
+
 } // namespace std
 
 #include "tuple.h"
