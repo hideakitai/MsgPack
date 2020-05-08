@@ -28,14 +28,65 @@
 
 namespace arx {
 
+    namespace detail
+    {
+        template<class T>
+        T&& move(T& t){ return static_cast<T&&>(t); }
+    }
+
     template<typename T, size_t N>
     class RingBuffer
     {
+    protected:
+
         T queue_[N];
         int head_ {0};
         int tail_ {0};
 
     public:
+
+        RingBuffer()
+        : queue_()
+        , head_ {0}
+        , tail_{0}
+        {
+        }
+
+        // copy
+        explicit RingBuffer(const RingBuffer& r)
+        : queue_()
+        , head_(r.head_)
+        , tail_(r.tail_)
+        {
+            for (size_t i = 0; i < r.size(); ++i)
+                queue_[i] = r.queue_[i];
+        }
+        RingBuffer& operator= (const RingBuffer& r)
+        {
+            head_ = r.head_;
+            tail_ = r.tail_;
+            for (size_t i = 0; i < r.size(); ++i)
+                queue_[i] = r.queue_[i];
+            return *this;
+        }
+
+        // move
+        RingBuffer(RingBuffer&& r)
+        {
+            head_ = detail::move(r.head_);
+            tail_ = detail::move(r.tail_);
+            for (size_t i = 0; i < r.size(); ++i)
+                queue_[i] = detail::move(r.queue_[i]);
+        }
+
+        RingBuffer& operator= (RingBuffer&& r)
+        {
+            head_ = detail::move(r.head_);
+            tail_ = detail::move(r.tail_);
+            for (size_t i = 0; i < r.size(); ++i)
+                queue_[i] = detail::move(r.queue_[i]);
+            return *this;
+        }
 
         virtual ~RingBuffer() {}
 
@@ -157,6 +208,21 @@ namespace arx {
         }
 
     };
+
+    template <typename T, size_t N>
+    bool operator== (const RingBuffer<T, N>& x, const RingBuffer<T, N>& y)
+    {
+        if (x.size() != y.size()) return false;
+        for (size_t i = 0; i < x.size(); ++i)
+            if (x[i] != y[i]) return false;
+        return true;
+    }
+
+    template <typename T, size_t N>
+    bool operator!= (const RingBuffer<T, N>& x, const RingBuffer<T, N>& y)
+    {
+        return !(x == y);
+    }
 
 
     template <typename T, size_t N = ARX_VECTOR_DEFAULT_SIZE>
