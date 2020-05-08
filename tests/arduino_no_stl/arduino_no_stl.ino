@@ -1,7 +1,14 @@
 #include <Arduino.h>
 
-#define MSGPACK_UNPACKER_MAX_INDICES_SIZE 64
-#define MSGPACK_PACKER_MAX_BUFFER_BYTE_SIZE 384
+// #define TEST_BINARY
+
+#ifdef TEST_BINARY
+    #define MSGPACK_UNPACKER_MAX_INDICES_SIZE 64
+    #define MSGPACK_PACKER_MAX_BUFFER_BYTE_SIZE 128
+#else
+    #define MSGPACK_UNPACKER_MAX_INDICES_SIZE 64
+    #define MSGPACK_PACKER_MAX_BUFFER_BYTE_SIZE 300
+#endif
 
 #include <MsgPack.h>
 
@@ -55,6 +62,7 @@ void setup()
 
     Serial.println("msgpack test start");
 
+#ifndef TEST_BINARY
     {
         MsgPack::Packer packer;
 
@@ -294,12 +302,50 @@ void setup()
         assert(unpacker.unpackString8() == MsgPack::StringType(str8));
         assert(unpacker.unpackString16() == MsgPack::StringType(str16));
     }
+#else
     {
         MsgPack::Packer packer;
 
         // ---------- BIN format family ----------
 
+        MsgPack::ArrayType<uint8_t> bin8_v;
+        // MsgPack::ArrayType<uint8_t> bin16_v;
+        // MsgPack::ArrayType<uint8_t> bin32_v;
+
+        bin8_v.resize(10);
+        // bin16_v.resize(bin16_v.capacity());
+        // bin32_v.resize(bin32_v.capacity());
+        for (auto& b : bin8_v) b = 8;
+        // for (auto& b : bin16_v) b = 16;
+        // for (auto& b : bin32_v) b = 32;
+
+        packer.packBinary8(bin8_v.data(), bin8_v.size());
+        // packer.packBinary16(bin16_v.data(), bin16_v.size());
+        // packer.packBinary32(bin32_v.data(), bin32_v.size());
+
+        // // wrappers
+        packer.pack(bin8_v.data(), bin8_v.size());
+        // packer.pack(bin16_v.data(), bin16_v.size());
+        // packer.pack(bin32_v.data(), bin32_v.size());
+
+        packer.pack(bin8_v);
+        // packer.pack(bin16_v);
+        // packer.pack(bin32_v);
+
+        MsgPack::Unpacker unpacker;
+        unpacker.feed(packer.data(), packer.size());
+
+        assert(unpacker.unpackBinary8() == bin8_v);
+        // assert(unpacker.unpackBinary16() == bin16_v);
+        // assert(unpacker.unpackBinary32() == bin32_v);
+        assert(unpacker.unpackBinary8() == bin8_v);
+        // assert(unpacker.unpackBinary16() == bin16_v);
+        // assert(unpacker.unpackBinary32() == bin32_v);
+        assert(unpacker.unpackBinary8() == bin8_v);
+        // assert(unpacker.unpackBinary16() == bin16_v);
+        // assert(unpacker.unpackBinary32() == bin32_v);
     }
+#endif
     {
         MsgPack::Packer packer;
 
