@@ -9,10 +9,10 @@
  || defined(ARDUINO_ARCH_MEGAAVR)\
  || defined(ARDUINO_ARCH_SAMD)\
  || defined(ARDUINO_spresense_ast)
-    #define ARX_SMART_PTR_DISABLED
+    #define ARX_CONTAINER_DISABLED
 #endif
 
-#ifdef ARX_SMART_PTR_DISABLED
+#ifdef ARX_CONTAINER_DISABLED
 
 #ifndef ARX_VECTOR_DEFAULT_SIZE
 #define ARX_VECTOR_DEFAULT_SIZE 16
@@ -25,6 +25,26 @@
 #ifndef ARX_MAP_DEFAULT_SIZE
 #define ARX_MAP_DEFAULT_SIZE 16
 #endif // ARX_MAP_DEFAULT_SIZE
+
+#ifndef ARX_TYPE_TRAITS_INITIALIZER_LIST_DEFINED
+#define ARX_TYPE_TRAITS_INITIALIZER_LIST_DEFINED
+namespace std
+{
+    template<class T>
+    class initializer_list
+    {
+    private:
+        const T* array;
+        size_t len;
+        initializer_list(const T* a, size_t l) : array(a), len(l) {}
+    public:
+        initializer_list() : array(nullptr), len(0) {}
+        size_t size() const { return len; }
+        const T *begin() const { return array; }
+        const T *end() const { return array + len; }
+    };
+}
+#endif // ARX_TYPE_TRAITS_INITIALIZER_LIST_DEFINED
 
 namespace arx {
 
@@ -50,6 +70,18 @@ namespace arx {
         , head_ {0}
         , tail_{0}
         {
+        }
+
+        RingBuffer(std::initializer_list<T> lst)
+        : queue_()
+        , head_(0)
+        , tail_(0)
+        {
+            for (auto it = lst.begin() ; it != lst.end() ; ++it)
+            {
+                queue_[tail_] = *it;
+                ++tail_;
+            }
         }
 
         // copy
@@ -91,6 +123,7 @@ namespace arx {
         virtual ~RingBuffer() {}
 
         using iterator = T*;
+        using const_iterator = const T*;
 
         size_t capacity() const { return N; };
         size_t size() const { return tail_ - head_; }
@@ -152,6 +185,9 @@ namespace arx {
         iterator begin() { return ptr(head_); }
         iterator end() { return (queue_ + tail_); }
 
+        const_iterator begin() const { return (const_iterator)ptr(head_); }
+        const_iterator end() const { return (const_iterator)(queue_ + tail_); }
+
         iterator erase(iterator p)
         {
             if (p == end()) return p;
@@ -179,6 +215,11 @@ namespace arx {
             clear();
             const char* p = first;
             while (p != end) push(*p++);
+        }
+
+        void shrink_to_fit()
+        {
+            // dummy
         }
 
     private:
@@ -228,7 +269,29 @@ namespace arx {
     template <typename T, size_t N = ARX_VECTOR_DEFAULT_SIZE>
     struct vector : public RingBuffer<T, N>
     {
+        vector() : RingBuffer<T, N>() { }
+        vector(std::initializer_list<T> lst) : RingBuffer<T, N>(lst) { }
+
+        // copy
+        vector(const vector& r) : RingBuffer<T, N>(r) { }
+
+        vector& operator= (const vector& r)
+        {
+            RingBuffer<T, N>::operator=(r);
+            return *this;
+        }
+
+        // move
+        vector(vector&& r) : RingBuffer<T, N>(r) { }
+
+        vector& operator= (vector&& r)
+        {
+            RingBuffer<T, N>::operator=(r);
+            return *this;
+        }
+
         virtual ~vector() {}
+
     private:
         using RingBuffer<T, N>::pop;
         using RingBuffer<T, N>::pop_front;
@@ -237,10 +300,33 @@ namespace arx {
         using RingBuffer<T, N>::emplace;
     };
 
+
     template <typename T, size_t N = ARX_DEQUE_DEFAULT_SIZE>
     struct deque : public RingBuffer<T, N>
     {
+        deque() : RingBuffer<T, N>() { }
+        deque(std::initializer_list<T> lst) : RingBuffer<T, N>(lst) { }
+
+        // copy
+        deque(const deque& r) : RingBuffer<T, N>(r) { }
+
+        deque& operator= (const deque& r)
+        {
+            RingBuffer<T, N>::operator=(r);
+            return *this;
+        }
+
+        // move
+        deque(deque&& r) : RingBuffer<T, N>(r) { }
+
+        deque& operator= (deque&& r)
+        {
+            RingBuffer<T, N>::operator=(r);
+            return *this;
+        }
+
         virtual ~deque() {}
+
     private:
         using RingBuffer<T, N>::capacity;
         using RingBuffer<T, N>::pop;
@@ -250,6 +336,7 @@ namespace arx {
         using RingBuffer<T, N>::begin;
         using RingBuffer<T, N>::end;
     };
+
 
     template <class T1, class T2>
     struct pair
@@ -264,10 +351,44 @@ namespace arx {
         return {t1, t2};
     };
 
+    template <typename T1, typename T2>
+    bool operator== (const pair<T1, T2>& x, const pair<T1, T2>& y)
+    {
+        return (x.first == y.first) && (x.second == y.second);
+    }
+
+    template <typename T1, typename T2>
+    bool operator!= (const pair<T1, T2>& x, const pair<T1, T2>& y)
+    {
+        return !(x == y);
+    }
+
+
     template <class Key, class T, size_t N = ARX_MAP_DEFAULT_SIZE>
     struct map : public RingBuffer<pair<Key, T>, N>
     {
         using iterator = typename RingBuffer<pair<Key, T>, N>::iterator;
+
+        map() : RingBuffer<pair<Key, T>, N>() { }
+        map(std::initializer_list<pair<Key, T>> lst) : RingBuffer<pair<Key, T>, N>(lst) { }
+
+        // copy
+        map(const map& r) : RingBuffer<pair<Key, T>, N>(r) { }
+
+        map& operator= (const map& r)
+        {
+            RingBuffer<pair<Key, T>, N>::operator=(r);
+            return *this;
+        }
+
+        // move
+        map(map&& r) : RingBuffer<T, N>(r) { }
+
+        map& operator= (map&& r)
+        {
+            RingBuffer<pair<Key, T>, N>::operator=(r);
+            return *this;
+        }
 
         virtual ~map() {}
 
@@ -362,6 +483,24 @@ namespace arx {
             insert(::arx::make_pair(key, T()));
             return this->back().second;
         }
+
+    private:
+
+        using RingBuffer<pair<Key, T>, N>::capacity;
+        using RingBuffer<pair<Key, T>, N>::data;
+        using RingBuffer<pair<Key, T>, N>::pop;
+        using RingBuffer<pair<Key, T>, N>::pop_front;
+        using RingBuffer<pair<Key, T>, N>::pop_back;
+        using RingBuffer<pair<Key, T>, N>::push;
+        using RingBuffer<pair<Key, T>, N>::push_back;
+        using RingBuffer<pair<Key, T>, N>::push_front;
+        using RingBuffer<pair<Key, T>, N>::emplace_back;
+        using RingBuffer<pair<Key, T>, N>::front;
+        using RingBuffer<pair<Key, T>, N>::back;
+        using RingBuffer<pair<Key, T>, N>::operator[];
+        using RingBuffer<pair<Key, T>, N>::resize;
+        using RingBuffer<pair<Key, T>, N>::assign;
+        using RingBuffer<pair<Key, T>, N>::shrink_to_fit;
     };
 
 } // namespace arx
@@ -370,5 +509,5 @@ template<typename T, size_t N>
 using ArxRingBuffer = arx::RingBuffer<T, N>;
 
 
-#endif // ARX_SMART_PTR_DISABLED
+#endif // ARX_CONTAINER_DISABLED
 #endif // ARX_RINGBUFFER_H
