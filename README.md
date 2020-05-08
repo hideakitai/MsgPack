@@ -164,7 +164,7 @@ I reccomend to use low cost but much better performance chip like ESP series.
 
 ## Embedded Libraries
 
-- [ArxTypeTraits v0.1.1](https://github.com/hideakitai/ArxTypeTraits)
+- [ArxTypeTraits v0.1.2](https://github.com/hideakitai/ArxTypeTraits)
 - [ArxContainer v0.3.2](https://github.com/hideakitai/ArxContainer)
 - [TeensyDirtySTLErrorSolution v0.1.0](https://github.com/hideakitai/TeensyDirtySTLErrorSolution)
 

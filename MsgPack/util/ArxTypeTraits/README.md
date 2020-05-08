@@ -45,6 +45,7 @@ Others are automatically enabled/disabled depending on compiler.
 - `std::is_function`
 - `std::decay`
 - `std::result_of`
+- `std::initializer_list`
 
 
 #### for utility
