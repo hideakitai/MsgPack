@@ -33,10 +33,11 @@ Please use C++ Standard Template Library for other boards.
 ### vector
 
 ```C++
-arx::vector<int> vs;
+// initialize with initializer_list
+arx::vector<int> vs {1, 2, 3};
 
 // add contents
-for (size_t i = 0; i < 5; ++i)
+for (size_t i = 4; i <= 5; ++i)
     vs.push_back(i);
 
 // index access
@@ -51,11 +52,12 @@ for (const auto& v : vs)
 ### map
 
 ``` C++
-arx::map<String, int> mp;
+// initialize with initializer_list
+arx::map<String, int> mp {{"one", 1}, {"two", 2}};
 
 // add contents
-mp.insert("one", 1);
-mp["two"] = 2;
+mp.insert("three", 3);
+mp["four"] = 4;
 
 // range based access
 for (const auto& m : mp)
@@ -67,17 +69,20 @@ for (const auto& m : mp)
 }
 
 // key access
-Serial.print("one = "); Serial.println(mp["one"]);
-Serial.print("two = "); Serial.println(mp["two"]);
+Serial.print("one   = "); Serial.println(mp["one"]);
+Serial.print("two   = "); Serial.println(mp["two"]);
+Serial.print("three = "); Serial.println(mp["three"]);
+Serial.print("four  = "); Serial.println(mp["four"]);
 ```
 
 ### deque
 
 ```C++
-arx::deque<int> dq;
+// initialize with initializer_list
+arx::deque<int> dq {1, 2, 3};
 
 // add contents
-for (int i = 0; i < 5; ++i)
+for (int i = 4; i <= 5; ++i)
     dq.push_back(i);
 
 // index access
