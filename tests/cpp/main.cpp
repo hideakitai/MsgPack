@@ -239,51 +239,51 @@ int main ()
         packer.pack(str8);
         packer.pack(str16);
 
-        packer.packString5(MsgPack::StringType(str0));
-        packer.packString5(MsgPack::StringType(str5));
-        packer.packString8(MsgPack::StringType(str8));
-        packer.packString16(MsgPack::StringType(str16));
+        packer.packString5(MsgPack::str_t(str0));
+        packer.packString5(MsgPack::str_t(str5));
+        packer.packString8(MsgPack::str_t(str8));
+        packer.packString16(MsgPack::str_t(str16));
         // packer.packString32(str32); // TODO:
         // wrappers
-        packer.pack(MsgPack::StringType(str0));
-        packer.pack(MsgPack::StringType(str5));
-        packer.pack(MsgPack::StringType(str8));
-        packer.pack(MsgPack::StringType(str16));
+        packer.pack(MsgPack::str_t(str0));
+        packer.pack(MsgPack::str_t(str5));
+        packer.pack(MsgPack::str_t(str8));
+        packer.pack(MsgPack::str_t(str16));
         // packer.pack(str32); // TODO:
 
 
         MsgPack::Unpacker unpacker;
         unpacker.feed(packer.data(), packer.size());
 
-        assert(unpacker.unpackString5() == MsgPack::StringType(str0));
-        assert(unpacker.unpackString5() == MsgPack::StringType(str5));
-        assert(unpacker.unpackString8() == MsgPack::StringType(str8));
-        assert(unpacker.unpackString16() == MsgPack::StringType(str16));
-        assert(unpacker.unpackString5() == MsgPack::StringType(str0));
-        assert(unpacker.unpackString5() == MsgPack::StringType(str5));
-        assert(unpacker.unpackString8() == MsgPack::StringType(str8));
-        assert(unpacker.unpackString16() == MsgPack::StringType(str16));
-        assert(unpacker.unpackString5() == MsgPack::StringType(str0));
-        assert(unpacker.unpackString5() == MsgPack::StringType(str5));
-        assert(unpacker.unpackString8() == MsgPack::StringType(str8));
-        assert(unpacker.unpackString16() == MsgPack::StringType(str16));
-        assert(unpacker.unpackString5() == MsgPack::StringType(str0));
-        assert(unpacker.unpackString5() == MsgPack::StringType(str5));
-        assert(unpacker.unpackString8() == MsgPack::StringType(str8));
-        assert(unpacker.unpackString16() == MsgPack::StringType(str16));
-        assert(unpacker.unpackString5() == MsgPack::StringType(str0));
-        assert(unpacker.unpackString5() == MsgPack::StringType(str5));
-        assert(unpacker.unpackString8() == MsgPack::StringType(str8));
-        assert(unpacker.unpackString16() == MsgPack::StringType(str16));
-        assert(unpacker.unpackString5() == MsgPack::StringType(str0));
-        assert(unpacker.unpackString5() == MsgPack::StringType(str5));
-        assert(unpacker.unpackString8() == MsgPack::StringType(str8));
-        assert(unpacker.unpackString16() == MsgPack::StringType(str16));
+        assert(unpacker.unpackString5() == MsgPack::str_t(str0));
+        assert(unpacker.unpackString5() == MsgPack::str_t(str5));
+        assert(unpacker.unpackString8() == MsgPack::str_t(str8));
+        assert(unpacker.unpackString16() == MsgPack::str_t(str16));
+        assert(unpacker.unpackString5() == MsgPack::str_t(str0));
+        assert(unpacker.unpackString5() == MsgPack::str_t(str5));
+        assert(unpacker.unpackString8() == MsgPack::str_t(str8));
+        assert(unpacker.unpackString16() == MsgPack::str_t(str16));
+        assert(unpacker.unpackString5() == MsgPack::str_t(str0));
+        assert(unpacker.unpackString5() == MsgPack::str_t(str5));
+        assert(unpacker.unpackString8() == MsgPack::str_t(str8));
+        assert(unpacker.unpackString16() == MsgPack::str_t(str16));
+        assert(unpacker.unpackString5() == MsgPack::str_t(str0));
+        assert(unpacker.unpackString5() == MsgPack::str_t(str5));
+        assert(unpacker.unpackString8() == MsgPack::str_t(str8));
+        assert(unpacker.unpackString16() == MsgPack::str_t(str16));
+        assert(unpacker.unpackString5() == MsgPack::str_t(str0));
+        assert(unpacker.unpackString5() == MsgPack::str_t(str5));
+        assert(unpacker.unpackString8() == MsgPack::str_t(str8));
+        assert(unpacker.unpackString16() == MsgPack::str_t(str16));
+        assert(unpacker.unpackString5() == MsgPack::str_t(str0));
+        assert(unpacker.unpackString5() == MsgPack::str_t(str5));
+        assert(unpacker.unpackString8() == MsgPack::str_t(str8));
+        assert(unpacker.unpackString16() == MsgPack::str_t(str16));
 
-        MsgPack::StringType r_str0;
+        MsgPack::str_t r_str0;
         unpacker.index(0);
         unpacker.unpack(r_str0);
-        assert(r_str0 == MsgPack::StringType(str0));
+        assert(r_str0 == MsgPack::str_t(str0));
     }
     {
         MsgPack::Packer packer;
@@ -522,7 +522,7 @@ int main ()
             assert(unpacker.unpackInt5() == int5);
             assert(unpacker.unpackIntU8() == intu8);
             assert(unpacker.unpackInt8() == int8);
-            assert(unpacker.unpackString5() == MsgPack::StringType(str5));
+            assert(unpacker.unpackString5() == MsgPack::str_t(str5));
         // TODO:
         // assert(unpacker.unpackArraySize() == arr_size16);
         // assert(unpacker.unpackArraySize() == arr_size32);
@@ -628,11 +628,11 @@ int main ()
 
 #if 0
         assert(unpacker.unpackMapSize() == map_size4);
-            assert(unpacker.unpackString5() == MsgPack::StringType(str5));
+            assert(unpacker.unpackString5() == MsgPack::str_t(str5));
             assert(unpacker.unpackIntU7() == intu7);
-            assert(unpacker.unpackString5() == MsgPack::StringType(str5));
+            assert(unpacker.unpackString5() == MsgPack::str_t(str5));
             assert(unpacker.unpackInt5() == int5);
-            assert(unpacker.unpackString5() == MsgPack::StringType(str5));
+            assert(unpacker.unpackString5() == MsgPack::str_t(str5));
             assert(unpacker.unpackFloat32() == f);
         // assert(unpacker.unpackMapSize() == map_size16);
         // assert(unpacker.unpackMapSize() == map_size32);

@@ -11,24 +11,66 @@
 
 #ifdef HT_SERIAL_MSGPACK_DISABLE_STL
     #include "util/ArxContainer/ArxContainer.h"
+    #ifdef HT_SERIAL_MSGPACK_DISABLE_STL
+        #ifndef MSGPACK_MAX_PACKET_BYTE_SIZE
+            #define MSGPACK_MAX_PACKET_BYTE_SIZE 128
+        #endif // MSGPACK_MAX_PACKET_BYTE_SIZE
+        #ifndef MSGPACK_MAX_ARRAY_SIZE
+            #define MSGPACK_MAX_ARRAY_SIZE 8
+        #endif // MSGPACK_MAX_ARRAY_SIZE
+        #ifndef MSGPACK_MAX_MAP_SIZE
+            #define MSGPACK_MAX_MAP_SIZE 8
+        #endif // MSGPACK_MAX_MAP_SIZE
+        #ifndef MSGPACK_MAX_OBJECT_SIZE
+            #define MSGPACK_MAX_OBJECT_SIZE 16
+        #endif // MSGPACK_MAX_OBJECT_SIZE
+    #endif // HT_SERIAL_MSGPACK_DISABLE_STL
 #else
     #include <vector>
+    #include <map>
 #endif // HT_SERIAL_MSGPACK_DISABLE_STL
+
+#include "util/ArxTypeTraits/ArxTypeTraits.h"
 
 namespace ht {
 namespace serial {
 namespace msgpack {
 
 #ifdef HT_SERIAL_MSGPACK_DISABLE_STL
-    template <typename T, size_t N = MSGPACK_PACKER_MAX_BUFFER_BYTE_SIZE>
-    using ArrayType = arx::vector<T, N>;
-    using IndicesType = arx::vector<size_t, MSGPACK_UNPACKER_MAX_INDICES_SIZE>;
+    using idx_t = arx::vector<size_t, MSGPACK_MAX_OBJECT_SIZE>;
+    template <typename T, size_t N = MSGPACK_MAX_ARRAY_SIZE>
+    using arr_t = arx::vector<T, N>;
+    template <typename T, typename U, size_t N = MSGPACK_MAX_MAP_SIZE>
+    using map_t = arx::map<T, U, N>;
+    template <typename T, size_t N = MSGPACK_MAX_PACKET_BYTE_SIZE>
+    using bin_t = arx::vector<
+        typename std::enable_if<
+            std::is_same<T, uint8_t>::value ||
+            std::is_same<T, char>::value,
+            T
+        >::type,
+    N>;
 #else
+    using idx_t = std::vector<size_t>;
     template <typename T>
-    using ArrayType = std::vector<T>;
-    using IndicesType = std::vector<size_t>;
+    using arr_t = std::vector<T>;
+    template <typename T, typename U>
+    using map_t = std::map<T, U>;
+    template <typename T>
+    using bin_t = std::vector<
+        typename std::enable_if<
+            std::is_same<T, uint8_t>::value ||
+            std::is_same<T, char>::value,
+            T
+        >::type
+    >;
 #endif
-    using BinaryBuffer = ArrayType<uint8_t>;
+#ifdef ARDUINO
+    using str_t = String;
+#else
+    using str_t = std::string;
+#endif
+
 
     namespace object
     {
@@ -103,12 +145,6 @@ namespace msgpack {
         FIXMAP = 0x0F,
         MAP4 = 0x0F, // same as FIXMAP
     };
-
-#ifdef ARDUINO
-    using StringType = String;
-#else
-    using StringType = std::string;
-#endif
 
 } // msgpack
 } // serial

@@ -30,7 +30,7 @@ namespace msgpack {
 
     class Packer
     {
-        BinaryBuffer buffer;
+        bin_t<uint8_t> buffer;
 
     public:
 
@@ -52,6 +52,7 @@ namespace msgpack {
         {
         }
 
+        const bin_t<uint8_t>& packet() const { return buffer; }
         const uint8_t* data() const { return buffer.data(); }
         size_t size() const { return buffer.size(); }
         void clear() { buffer.clear(); } //buffer.shrink_to_fit(); }
@@ -162,11 +163,11 @@ namespace msgpack {
 
         void pack(const char* str)
         {
-            StringType s(str);
+            str_t s(str);
             pack(s);
         }
 
-        void pack(const StringType& str)
+        void pack(const str_t& str)
         {
             if (str.length() <= (size_t)BitMask::STR5)
                 packString5(str);
@@ -197,12 +198,12 @@ namespace msgpack {
                 packBinary32(bin, size);
         }
 
-        void pack(const ArrayType<char>& bin)
+        void pack(const bin_t<char>& bin)
         {
             pack((const uint8_t*)bin.data(), bin.size());
         }
 
-        void pack(const ArrayType<uint8_t>& bin)
+        void pack(const bin_t<uint8_t>& bin)
         {
             pack(bin.data(), bin.size());
         }
@@ -233,8 +234,8 @@ namespace msgpack {
         // - std::list
         // - std::forward_list
         // - std::set
-        // - std::unordered_set *
         // - std::multiset
+        // - std::unordered_set *
         // - std::unordered_multiset *
         // * : not supported in arduino
 
@@ -250,7 +251,7 @@ namespace msgpack {
         }
 
         template <typename T>
-        auto pack(const ArrayType<T>& arr)
+        auto pack(const arr_t<T>& arr)
         -> typename std::enable_if <
             !std::is_same<T, char>::value &&
             !std::is_same<T, unsigned char>::value
@@ -285,7 +286,9 @@ namespace msgpack {
             pack(arr.second);
         }
 
-        template<std::size_t I = 0, typename... Ts>
+#endif // HT_SERIAL_MSGPACK_DISABLE_STL
+
+        template<size_t I = 0, typename... Ts>
         auto pack(const std::tuple<Ts...>& t)
         -> typename std::enable_if<I < sizeof...(Ts)>::type
         {
@@ -294,11 +297,13 @@ namespace msgpack {
             pack<I + 1, Ts...>(t);
         }
 
-        template<std::size_t I = 0, typename... Ts>
+        template<size_t I = 0, typename... Ts>
         auto pack(const std::tuple<Ts...>&)
         -> typename std::enable_if<I == sizeof...(Ts)>::type
         {
         }
+
+#ifndef HT_SERIAL_MSGPACK_DISABLE_STL
 
         template <typename T>
         void pack(const std::list<T>& arr)
@@ -321,13 +326,13 @@ namespace msgpack {
         }
 
         template <typename T>
-        void pack(const std::unordered_set<T>& arr)
+        void pack(const std::multiset<T>& arr)
         {
             packArrayContainer(arr);
         }
 
         template <typename T>
-        void pack(const std::multiset<T>& arr)
+        void pack(const std::unordered_set<T>& arr)
         {
             packArrayContainer(arr);
         }
@@ -342,27 +347,27 @@ namespace msgpack {
 
         // ---------- MAP format family ----------
         // - std::map
-        // - std::unordered_map *
         // - std::multimap
+        // - std::unordered_map *
         // - std::unordered_multimap *
         // * : not supported in arduino
+
+        template <typename T, typename U>
+        void pack(const map_t<T, U>& mp)
+        {
+            packMapContainer(mp);
+        }
 
 #ifndef HT_SERIAL_MSGPACK_DISABLE_STL
 
         template <typename T, typename U>
-        void pack(const std::map<T, U>& mp)
+        void pack(const std::multimap<T, U>& mp)
         {
             packMapContainer(mp);
         }
 
         template <typename T, typename U>
         void pack(const std::unordered_map<T, U>& mp)
-        {
-            packMapContainer(mp);
-        }
-
-        template <typename T, typename U>
-        void pack(const std::multimap<T, U>& mp)
         {
             packMapContainer(mp);
         }
@@ -483,18 +488,18 @@ namespace msgpack {
 
         // ---------- STR format family ----------
 
-        void packString5(const StringType& str)
+        void packString5(const str_t& str)
         {
             packRawByte((uint8_t)Type::STR5 | (str.length() & (uint8_t)BitMask::STR5));
             packRawBytes(str.c_str(), str.length());
         }
         void packString5(const char* value)
         {
-            StringType str(value);
+            str_t str(value);
             packString5(str);
         }
 
-        void packString8(const StringType& str)
+        void packString8(const str_t& str)
         {
             packRawByte(Type::STR8);
             packRawByte((uint8_t)str.length());
@@ -502,11 +507,11 @@ namespace msgpack {
         }
         void packString8(const char* value)
         {
-            StringType str(value);
+            str_t str(value);
             packString8(str);
         }
 
-        void packString16(const StringType& str)
+        void packString16(const str_t& str)
         {
             packRawByte(Type::STR16);
             packRawReversed((uint16_t)str.length());
@@ -514,11 +519,11 @@ namespace msgpack {
         }
         void packString16(const char* value)
         {
-            StringType str(value);
+            str_t str(value);
             packString16(str);
         }
 
-        void packString32(const StringType& str)
+        void packString32(const str_t& str)
         {
             packRawByte(Type::STR32);
             packRawReversed((uint32_t)str.length());
@@ -526,7 +531,7 @@ namespace msgpack {
         }
         void packString32(const char* value)
         {
-            StringType str(value);
+            str_t str(value);
             packString32(str);
         }
 

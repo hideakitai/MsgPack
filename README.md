@@ -146,9 +146,13 @@ And of course you can manage them.
 
 ``` C++
 // msgpack serialized binary size
-#define MSGPACK_PACKER_MAX_BUFFER_BYTE_SIZE 256 // default: 128
-// msgpack objects size
-#define MSGPACK_UNPACKER_MAX_INDICES_SIZE 32    // default: 16
+#define MSGPACK_MAX_PACKET_BYTE_SIZE 256 // default: 128
+// max size of MsgPack::arr_t
+#define MSGPACK_MAX_ARRAY_SIZE        16 // default: 8
+// max size of MsgPack::map_t
+#define MSGPACK_MAX_MAP_SIZE          16 // default: 8
+// msgpack objects size in one packet
+#define MSGPACK_MAX_OBJECT_SIZE       32 // default: 16
 ```
 
 These macros have no effect for STL enabled boards.

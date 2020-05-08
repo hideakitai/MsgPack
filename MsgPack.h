@@ -9,16 +9,6 @@
 #define HT_SERIAL_MSGPACK_DISABLE_STL
 #endif
 
-#ifdef HT_SERIAL_MSGPACK_DISABLE_STL
-    #ifndef MSGPACK_PACKER_MAX_BUFFER_BYTE_SIZE
-        #define MSGPACK_PACKER_MAX_BUFFER_BYTE_SIZE 128
-    #endif // MSGPACK_PACKER_MAX_BUFFER_BYTE_SIZE
-    #ifndef MSGPACK_UNPACKER_MAX_INDICES_SIZE
-        #define MSGPACK_UNPACKER_MAX_INDICES_SIZE 16
-    #endif // MSGPACK_UNPACKER_MAX_INDICES_SIZE
-#endif // HT_SERIAL_MSGPACK_DISABLE_STL
-
-
 #include "MsgPack/Types.h"
 #include "MsgPack/Packer.h"
 #include "MsgPack/Unpacker.h"

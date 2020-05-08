@@ -1,30 +1,40 @@
 #include <MsgPack.h>
 
-#include <vector>
-#include <map>
-
 // input to msgpack
 int i = 123;
 float f = 1.23;
 String s = "str";
-std::vector<int> v {1, 2, 3};
-std::map<String, float> m {{"one", 1.1}, {"two", 2.2}, {"three", 3.3}};
+MsgPack::arr_t<int> v {1, 2, 3};
+MsgPack::map_t<String, float> m {{"one", 1.1}, {"two", 2.2}, {"three", 3.3}};
 
 // output from msgpack
 int ri;
 float rf;
 String rs;
-std::vector<int> rv;
-std::map<String, float> rm;
+MsgPack::arr_t<int> rv;
+MsgPack::map_t<String, float> rm;
+
+// for STL enabled boards:
+// MsgPack::arr_t -> std::vector
+// MsgPack::map_t -> std::map
+// MsgPack::bin_t -> std::vector<uint8_t> or <char>
+// for NO-STL boards:
+// MsgPack::arr_t -> arx::vector
+// MsgPack::map_t -> arx::map
+// MsgPack::bin_t -> arx::vector<uint8_t> or <char>
 
 void setup()
 {
-    delay(2000);
     Serial.begin(115200);
+    delay(2000);
+
     Serial.println("msgpack test start");
 
     MsgPack::Packer packer;
     packer.encode(i, f, s, v, m);
+
+    // you can also get serialized binary buffer
+    // const MsgPack::bin_t<uint8_t>& packet = packer.packet();
 
     MsgPack::Unpacker unpacker;
     unpacker.feed(packer.data(), packer.size());
