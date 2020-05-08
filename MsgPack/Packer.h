@@ -5,7 +5,6 @@
 #include "util/ArxTypeTraits/ArxTypeTraits.h"
 #ifdef HT_SERIAL_MSGPACK_DISABLE_STL
     #include "util/ArxContainer/ArxContainer.h"
-    // #include <ArduinoSTL.h>
 #else
     #include <vector>
     #include <array>
@@ -29,15 +28,9 @@ namespace ht {
 namespace serial {
 namespace msgpack {
 
-#ifdef HT_SERIAL_MSGPACK_DISABLE_STL
-    using Buffer = arx::vector<uint8_t, MSGPACK_PACKER_MAX_BUFFER_BYTE_SIZE>;
-#else
-    using Buffer = std::vector<uint8_t>;
-#endif
-
     class Packer
     {
-        Buffer buffer;
+        BinaryBuffer buffer;
 
     public:
 
@@ -204,17 +197,17 @@ namespace msgpack {
                 packBinary32(bin, size);
         }
 
-#ifndef HT_SERIAL_MSGPACK_DISABLE_STL
-
-        void pack(const std::vector<char>& bin)
+        void pack(const ArrayType<char>& bin)
         {
             pack((const uint8_t*)bin.data(), bin.size());
         }
 
-        void pack(const std::vector<uint8_t>& bin)
+        void pack(const ArrayType<uint8_t>& bin)
         {
             pack(bin.data(), bin.size());
         }
+
+#ifndef HT_SERIAL_MSGPACK_DISABLE_STL
 
         template <size_t N>
         void pack(const std::array<char, N>& bin)
@@ -256,10 +249,8 @@ namespace msgpack {
             for (size_t i = 0; i < size; ++i) pack(arr[i]);
         }
 
-#ifndef HT_SERIAL_MSGPACK_DISABLE_STL
-
         template <typename T>
-        auto pack(const std::vector<T>& arr)
+        auto pack(const ArrayType<T>& arr)
         -> typename std::enable_if <
             !std::is_same<T, char>::value &&
             !std::is_same<T, unsigned char>::value
@@ -267,6 +258,8 @@ namespace msgpack {
         {
             packArrayContainer(arr);
         }
+
+#ifndef HT_SERIAL_MSGPACK_DISABLE_STL
 
         template <typename T, size_t N>
         auto pack(const std::array<T, N>& arr)

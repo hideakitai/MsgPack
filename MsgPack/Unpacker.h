@@ -6,7 +6,6 @@
 #include "util/ArxTypeTraits/ArxTypeTraits.h"
 #ifdef HT_SERIAL_MSGPACK_DISABLE_STL
     #include "util/ArxContainer/ArxContainer.h"
-    // #include <ArduinoSTL.h>
 #else
     #include <vector>
     #include <array>
@@ -31,17 +30,13 @@ namespace serial {
 namespace msgpack {
 
 #ifdef HT_SERIAL_MSGPACK_DISABLE_STL
-    using IndicesType = arx::vector<size_t, MSGPACK_UNPACKER_MAX_INDICES_SIZE>;
     using namespace arx;
 #else
-    using IndicesType = std::vector<size_t>;
     using namespace std;
 #endif // HT_SERIAL_MSGPACK_DISABLE_STL
 
     class Unpacker
     {
-        // TODO: check if data structure is closed
-
         uint8_t* raw_data {nullptr};
         IndicesType indices;
         size_t curr_index {0};
@@ -225,10 +220,8 @@ namespace msgpack {
         // - std::array<char>
         // - std::array<unsigned char>
 
-#ifndef HT_SERIAL_MSGPACK_DISABLE_STL
-
         template <typename T>
-        auto unpack(std::vector<T>& bin)
+        auto unpack(ArrayType<T>& bin)
         -> typename std::enable_if<
             std::is_same<T, char>::value ||
             std::is_same<T, uint8_t>::value
@@ -236,6 +229,8 @@ namespace msgpack {
         {
             bin = unpackBinary<T>();
         }
+
+#ifndef HT_SERIAL_MSGPACK_DISABLE_STL
 
         template <typename T, size_t N>
         auto unpack(std::array<T, N>& bin)
@@ -264,10 +259,8 @@ namespace msgpack {
         // - std::multiset
         // - std::unordered_multiset
 
-#ifndef HT_SERIAL_MSGPACK_DISABLE_STL
-
         template <typename T>
-        auto unpack(std::vector<T>& arr)
+        auto unpack(ArrayType<T>& arr)
         -> typename std::enable_if<
             !std::is_same<T, char>::value &&
             !std::is_same<T, uint8_t>::value
@@ -276,6 +269,8 @@ namespace msgpack {
             unpackArrayContainerArray(arr);
             arr.shrink_to_fit();
         }
+
+#ifndef HT_SERIAL_MSGPACK_DISABLE_STL
 
         template <typename T, size_t N>
         auto unpack(std::array<T, N>& arr)
@@ -562,7 +557,7 @@ namespace msgpack {
                 for (uint8_t c = 0; c < size; ++c) str += getRawBytes<char>(curr_index, c + 1);
             }
             ++curr_index;
-            return str;
+            return std::move(str);
         }
 
         StringType unpackString8()
@@ -574,7 +569,7 @@ namespace msgpack {
                 for (uint8_t c = 0; c < size; ++c) str += getRawBytes<char>(curr_index, c + 1 + sizeof(uint8_t));
             }
             ++curr_index;
-            return str;
+            return std::move(str);
         }
 
         StringType unpackString16()
@@ -586,7 +581,7 @@ namespace msgpack {
                 for (uint16_t c = 0; c < size; ++c) str += getRawBytes<char>(curr_index, c + 1 + sizeof(uint16_t));
             }
             ++curr_index;
-            return str;
+            return std::move(str);
         }
 
         StringType unpackString32()
@@ -598,27 +593,26 @@ namespace msgpack {
                 for (uint32_t c = 0; c < size; ++c) str += getRawBytes<char>(curr_index, c + 1 + sizeof(uint32_t));
             }
             ++curr_index;
-            return str;
+            return std::move(str);
         }
 
-        // ---------- BIN format family ----------
 
-#ifndef HT_SERIAL_MSGPACK_DISABLE_STL
+        // ---------- BIN format family ----------
 
         template <typename T = uint8_t>
         auto unpackBinary()
         -> typename std::enable_if<
             std::is_same<T, char>::value ||
             std::is_same<T, uint8_t>::value,
-            std::vector<T>
+            ArrayType<T>
         >::type
         {
             Type type = getType();
-            if      (type == Type::BIN8)  return unpackBinary8<T>();
-            else if (type == Type::BIN16) return unpackBinary16<T>();
-            else if (type == Type::BIN32) return unpackBinary32<T>();
+            if      (type == Type::BIN8)  return std::move(unpackBinary8<T>());
+            else if (type == Type::BIN16) return std::move(unpackBinary16<T>());
+            else if (type == Type::BIN32) return std::move(unpackBinary32<T>());
             else                          ++curr_index;
-            return std::vector<T>();
+            return std::move(ArrayType<T>());
         }
 
         template <typename T = uint8_t>
@@ -626,17 +620,17 @@ namespace msgpack {
         -> typename std::enable_if<
             std::is_same<T, char>::value ||
             std::is_same<T, uint8_t>::value,
-            std::vector<T>
+            ArrayType<T>
         >::type
         {
-            std::vector<T> data;
+            ArrayType<T> data;
             if (getType() == Type::BIN8)
             {
                 uint8_t size = getRawBytes<uint8_t>(curr_index, 1);
                 for (uint8_t v = 0; v < size; ++v) data.emplace_back(getRawBytes<T>(curr_index, v + 1 + sizeof(uint8_t)));
             }
             ++curr_index;
-            return data;
+            return std::move(data);
         }
 
         template <typename T = uint8_t>
@@ -644,17 +638,17 @@ namespace msgpack {
         -> typename std::enable_if<
             std::is_same<T, char>::value ||
             std::is_same<T, uint8_t>::value,
-            std::vector<T>
+            ArrayType<T>
         >::type
         {
-            std::vector<T> data;
+            ArrayType<T> data;
             if (getType() == Type::BIN16)
             {
                 uint16_t size = getRawBytes<uint16_t>(curr_index, 1);
                 for (uint16_t v = 0; v < size; ++v) data.emplace_back(getRawBytes<T>(curr_index, v + 1 + sizeof(uint16_t)));
             }
             ++curr_index;
-            return data;
+            return std::move(data);
         }
 
         template <typename T = uint8_t>
@@ -662,18 +656,20 @@ namespace msgpack {
         -> typename std::enable_if<
             std::is_same<T, char>::value ||
             std::is_same<T, uint8_t>::value,
-            std::vector<T>
+            ArrayType<T>
         >::type
         {
-            std::vector<T> data;
+            ArrayType<T> data;
             if (getType() == Type::BIN32)
             {
                 uint32_t size = getRawBytes<uint32_t>(curr_index, 1);
                 for (uint32_t v = 0; v < size; ++v) data.emplace_back(getRawBytes<T>(curr_index, v + 1 + sizeof(uint32_t)));
             }
             ++curr_index;
-            return data;
+            return std::move(data);
         }
+
+#ifndef HT_SERIAL_MSGPACK_DISABLE_STL
 
         template <typename T, size_t N>
         auto unpackBinary()
@@ -684,11 +680,11 @@ namespace msgpack {
         >::type
         {
             Type type = getType();
-            if      (type == Type::BIN8)  return unpackBinary8<T, N>();
-            else if (type == Type::BIN16) return unpackBinary16<T, N>();
-            else if (type == Type::BIN32) return unpackBinary32<T, N>();
+            if      (type == Type::BIN8)  return std::move(unpackBinary8<T, N>());
+            else if (type == Type::BIN16) return std::move(unpackBinary16<T, N>());
+            else if (type == Type::BIN32) return std::move(unpackBinary32<T, N>());
             else                          ++curr_index;
-            return std::array<T, N>();
+            return std::move(std::array<T, N>());
         }
 
         template <typename T, size_t N>
@@ -706,7 +702,7 @@ namespace msgpack {
                 for (uint8_t v = 0; v < size; ++v) data[v] = getRawBytes<T>(curr_index, v + 1 + sizeof(uint8_t));
             }
             ++curr_index;
-            return data;
+            return std::move(data);
         }
 
         template <typename T, size_t N>
@@ -724,7 +720,7 @@ namespace msgpack {
                 for (uint16_t v = 0; v < size; ++v) data[v] = getRawBytes<T>(curr_index, v + 1 + sizeof(uint16_t));
             }
             ++curr_index;
-            return data;
+            return std::move(data);
         }
 
         template <typename T, size_t N>
@@ -742,7 +738,7 @@ namespace msgpack {
                 for (uint32_t v = 0; v < size; ++v) data[v] = getRawBytes<T>(curr_index, v + 1 + sizeof(uint32_t));
             }
             ++curr_index;
-            return data;
+            return std::move(data);
         }
 
 #endif // HT_SERIAL_MSGPACK_DISABLE_STL
@@ -908,10 +904,8 @@ namespace msgpack {
         // - std::array<char>
         // - std::array<unsigned char>
 
-#ifndef HT_SERIAL_MSGPACK_DISABLE_STL
-
         template <typename T = uint8_t>
-        auto unpackable(const std::vector<T>& bin) const
+        auto unpackable(const ArrayType<T>& bin) const
         -> typename std::enable_if<
             std::is_same<T, char>::value ||
             std::is_same<T, uint8_t>::value,
@@ -922,6 +916,8 @@ namespace msgpack {
             Type type = getType();
             return ((type == Type::BIN8) || (type == Type::BIN16) || (type == Type::BIN32));
         }
+
+#ifndef HT_SERIAL_MSGPACK_DISABLE_STL
 
         template <typename T, size_t N>
         auto unpackable(const std::array<T, N>& bin) const
@@ -953,10 +949,8 @@ namespace msgpack {
         // - std::multiset
         // - std::unordered_multiset
 
-#ifndef HT_SERIAL_MSGPACK_DISABLE_STL
-
         template <typename T>
-        auto unpackable(const std::vector<T>& arr) const
+        auto unpackable(const ArrayType<T>& arr) const
         -> typename std::enable_if<
             !std::is_same<T, char>::value &&
             !std::is_same<T, uint8_t>::value,
@@ -967,6 +961,8 @@ namespace msgpack {
             Type type = getType();
             return ((type == Type::ARRAY4) || (type == Type::ARRAY16) || (type == Type::ARRAY32));
         }
+
+#ifndef HT_SERIAL_MSGPACK_DISABLE_STL
 
         template <typename T, size_t N>
         auto unpackable(const std::array<T, N>& arr) const
@@ -1151,7 +1147,7 @@ private:
                 auto index = indices[i] + offset + distance;
                 ((uint8_t*)&data)[b] = raw_data[index];
             }
-            return data;
+            return std::move(data);
         }
 
         Type getType() const

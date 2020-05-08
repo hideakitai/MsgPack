@@ -9,9 +9,26 @@
     #include <string>
 #endif
 
+#ifdef HT_SERIAL_MSGPACK_DISABLE_STL
+    #include "util/ArxContainer/ArxContainer.h"
+#else
+    #include <vector>
+#endif // HT_SERIAL_MSGPACK_DISABLE_STL
+
 namespace ht {
 namespace serial {
 namespace msgpack {
+
+#ifdef HT_SERIAL_MSGPACK_DISABLE_STL
+    template <typename T, size_t N = MSGPACK_PACKER_MAX_BUFFER_BYTE_SIZE>
+    using ArrayType = arx::vector<T, N>;
+    using IndicesType = arx::vector<size_t, MSGPACK_UNPACKER_MAX_INDICES_SIZE>;
+#else
+    template <typename T>
+    using ArrayType = std::vector<T>;
+    using IndicesType = std::vector<size_t>;
+#endif
+    using BinaryBuffer = ArrayType<uint8_t>;
 
     namespace object
     {
