@@ -48,10 +48,13 @@ namespace std
 
 namespace arx {
 
-    namespace detail
+    namespace container
     {
-        template<class T>
-        T&& move(T& t){ return static_cast<T&&>(t); }
+        namespace detail
+        {
+            template<class T>
+            T&& move(T& t){ return static_cast<T&&>(t); }
+        }
     }
 
     template<typename T, size_t N>
@@ -105,18 +108,18 @@ namespace arx {
         // move
         RingBuffer(RingBuffer&& r)
         {
-            head_ = detail::move(r.head_);
-            tail_ = detail::move(r.tail_);
+            head_ = container::detail::move(r.head_);
+            tail_ = container::detail::move(r.tail_);
             for (size_t i = 0; i < r.size(); ++i)
-                queue_[i] = detail::move(r.queue_[i]);
+                queue_[i] = container::detail::move(r.queue_[i]);
         }
 
         RingBuffer& operator= (RingBuffer&& r)
         {
-            head_ = detail::move(r.head_);
-            tail_ = detail::move(r.tail_);
+            head_ = container::detail::move(r.head_);
+            tail_ = container::detail::move(r.tail_);
             for (size_t i = 0; i < r.size(); ++i)
-                queue_[i] = detail::move(r.queue_[i]);
+                queue_[i] = container::detail::move(r.queue_[i]);
             return *this;
         }
 
