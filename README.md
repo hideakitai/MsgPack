@@ -61,31 +61,54 @@ N/A
 
 ### Bool
 
-`bool`
+- `bool`
 
 ### Integer
 
-`char (signed/unsigned)`, `ints (signed/unsigned)`
+- `char (signed/unsigned)`
+- `ints (signed/unsigned)`
 
 ### Float
 
-`float`, `double`
+- `float`
+- `double`
 
 ### Str
 
-`char*`, `char[]`, `std::string`
+- `char*`
+- `char[]`
+- `std::string`
 
 ### Bin
 
-`unsigned char*`, `unsigned char[]`, `std::vector<char>`, `std::vector<unsigned char>`, `std::array<char>`, `std::array<unsigned char>`
+- `unsigned char*`
+- `unsigned char[]`
+- `std::vector<char>`
+- `std::vector<unsigned char>`
+- `std::array<char>`
+- `std::array<unsigned char>`
 
 ### Array
 
-`T[]`, `std::vector`, `std::array`, `std::deque`, `std::pair`, `std::tuple`m `std::list`, `std::forward_list`, `std::set`, `std::unordered_set`, `std::multiset`, `std::unordered_multiset`
+- `T[]`
+- `std::vector`
+- `std::array`
+- `std::deque`
+- `std::pair`
+- `std::tuple`
+- `std::list`
+- `std::forward_list`
+- `std::set`
+- `std::multiset`
+- `std::unordered_set`
+- `std::unordered_multiset`
 
 ### Map
 
-`std::map`, `std::unordered_map`, `std::multimap`, `std::unordered_multimap`
+- `std::map`
+- `std::multimap`
+- `std::unordered_map`
+- `std::unordered_multimap`
 
 ### Ext
 
@@ -97,7 +120,10 @@ N/A
 
 ### N/A
 
-`std::queue`, `std::priority_queue`, `std::bitset`, `std::stack`
+- `std::queue`
+- `std::priority_queue`
+- `std::bitset`
+- `std::stack`
 
 
 ### Note
