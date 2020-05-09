@@ -45,11 +45,10 @@ namespace msgpack {
     template <typename T, size_t N = MSGPACK_MAX_PACKET_BYTE_SIZE>
     using bin_t = arx::vector<
         typename std::enable_if<
-            std::is_same<T, uint8_t>::value ||
-            std::is_same<T, char>::value,
-            T
+            std::is_same<T, uint8_t>::value || std::is_same<T, char>::value, T
         >::type,
-    N>;
+        N
+    >;
 #else
     using idx_t = std::vector<size_t>;
     template <typename T>
@@ -59,10 +58,9 @@ namespace msgpack {
     template <typename T>
     using bin_t = std::vector<
         typename std::enable_if<
-            std::is_same<T, uint8_t>::value ||
-            std::is_same<T, char>::value,
-            T
-        >::type
+            std::is_same<T, uint8_t>::value || std::is_same<T, char>::value, T
+        >::type,
+        std::allocator<T>
     >;
 #endif
 #ifdef ARDUINO
