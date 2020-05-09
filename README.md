@@ -57,74 +57,60 @@ void loop()
 
 ### NIL
 
-- N/A
+N/A
 
 ### Bool
 
-- `bool`
+`bool`
 
 ### Integer
 
-- `char (signed/unsigned)`
-- `ints (signed/unsigned)`
+`char (signed/unsigned)`, `ints (signed/unsigned)`
 
 ### Float
 
-- `float`
-- `double`
+`float`, `double`
 
 ### Str
-- `char*`
-- `char[]`
-- `std::string`
+
+`char*`, `char[]`, `std::string`
 
 ### Bin
-- `unsigned char*`
-- `unsigned char[]`
-- `std::vector<char>`
-- `std::vector<unsigned char>`
-- `std::array<char>`
-- `std::array<unsigned char>`
+
+`unsigned char*`, `unsigned char[]`, `std::vector<char>`, `std::vector<unsigned char>`, `std::array<char>`, `std::array<unsigned char>`
 
 ### Array
-- `T[]`
-- `std::vector`
-- `std::array`
-- `std::deque`
-- `std::pair`
-- `std::tuple`
-- `std::list`
-- `std::forward_list`
-- `std::set`
-- `std::unordered_set` *
-- `std::multiset`
-- `std::unordered_multiset` *
+
+`T[]`, `std::vector`, `std::array`, `std::deque`, `std::pair`, `std::tuple`m `std::list`, `std::forward_list`, `std::set`, `std::unordered_set`, `std::multiset`, `std::unordered_multiset`
 
 ### Map
 
-- `std::map`
-- `std::unordered_map`
-- `std::multimap` *
-- `std::unordered_multimap` *
+`std::map`, `std::unordered_map`, `std::multimap`, `std::unordered_multimap`
 
 ### Ext
 
-- N/A
+N/A
 
 ### TimeStamp
 
-- N/A
+N/A
 
 ### N/A
-- `std::queue`
-- `std::priority_queue`
-- `std::bitset`
-- `std::stack`
+
+`std::queue`, `std::priority_queue`, `std::bitset`, `std::stack`
 
 
-C-style array and pointers are supported only packing.
-For unpacking, please use `std::vector<T>` or `std::array<T, N>`.
-`unordered_xxx` are not supported in Arduino.
+### Note
+
+- `unordered_xxx` cannot be used in all Arduino
+- C-style array and pointers are supported only packing.
+- for NO-STL Arduino, following types can be used
+  - all types of NIL, Bool, Integer, Float, Str, Bin
+  - for Array, only `T[]` and `MsgPack::arr_t<T>` (= `arx::vector<T>`) can be used
+  - for Map, only `MsgPack::map_t<T, U>` (= `arx::map<T, U>`) can be used
+  - for the detail of `arx::xxx`, see [ArxContainer](https://github.com/hideakitai/ArxContainer)
+
+
 
 ## Other Options
 
