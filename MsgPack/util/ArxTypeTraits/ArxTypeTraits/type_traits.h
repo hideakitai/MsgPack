@@ -397,6 +397,14 @@ namespace std {
     template <typename T>
     using decay_t = typename std::decay<T>::type;
 
+    template<class T>
+    using remove_cv_t = typename std::remove_cv<T>::type;
+    template<class T>
+    using remove_const_t = typename std::remove_const<T>::type;
+    template<class T>
+    using remove_volatile_t = typename std::remove_volatile<T>::type;
+    template<class T>
+    using remove_reference_t = typename std::remove_reference<T>::type;
 
     template<typename T, T ...Ts>
     struct integer_sequence
@@ -491,13 +499,20 @@ namespace std {
 #endif // C++14
 
 
-#if __cplusplus >= 201703L // C++17, C+=2a
-
+// C++17, C++2a
 namespace std {
 
-} // namespace std
+    template<class T>
+    struct remove_cvref
+    {
+        typedef std::remove_cv_t<std::remove_reference_t<T>> type;
+    };
 
-#endif // C++17, C++2a
+    template< class T >
+    using remove_cvref_t = typename remove_cvref<T>::type;
+
+} // namespace std
+// C++17, C++2a
 
 
 namespace arx { // others

@@ -61,6 +61,10 @@ Others are automatically enabled/disabled depending on compiler.
 
 - `std::enable_if_t`
 - `std::decay_t`
+- `std::remove_cv_t`
+- `std::remove_const_t`
+- `std::remove_volatile_t`
+- `std::remove_reference_t`
 - `std::integer_sequence`
 - `std::index_sequence`
 - `std::make_index_sequence`
@@ -77,7 +81,8 @@ Others are automatically enabled/disabled depending on compiler.
 
 ### C++2a
 
-currently nothing
+- `std::remove_cvref`
+- `std::remove_cvref_t`
 
 
 ### Others (defined for all boards)
