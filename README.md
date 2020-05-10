@@ -154,17 +154,18 @@ The storage size of such boards for max packet binary size and number of msgpack
 ### Memory Management (for NO-STL Boards)
 
 As mentioned above, for such boards like Arduino Uno, the storage sizes are limited.
-And of course you can manage them.
+And of course you can manage them by defining following macros.
+But these default values are optimized for such boards, please be careful not to excess your boards storage/memory.
 
 ``` C++
 // msgpack serialized binary size
-#define MSGPACK_MAX_PACKET_BYTE_SIZE 256 // default: 128
+#define MSGPACK_MAX_PACKET_BYTE_SIZE  128
 // max size of MsgPack::arr_t
-#define MSGPACK_MAX_ARRAY_SIZE        16 // default: 8
+#define MSGPACK_MAX_ARRAY_SIZE          8
 // max size of MsgPack::map_t
-#define MSGPACK_MAX_MAP_SIZE          16 // default: 8
+#define MSGPACK_MAX_MAP_SIZE            8
 // msgpack objects size in one packet
-#define MSGPACK_MAX_OBJECT_SIZE       32 // default: 16
+#define MSGPACK_MAX_OBJECT_SIZE        32
 ```
 
 These macros have no effect for STL enabled boards.
