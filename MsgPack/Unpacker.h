@@ -24,6 +24,7 @@
 #endif // TEENSYDUINO
 
 #include "Types.h"
+#include "util/DebugLog/DebugLog.h"
 
 namespace ht {
 namespace serial {
@@ -133,8 +134,7 @@ namespace msgpack {
             else if (type == Type::UINT64) value = unpackIntU64();
             else
             {
-                // TODO: error handling
-
+                LOG_WARNING("unpack type is not matched :", (int)type);
                 value = 0;
                 ++curr_index;
             }
@@ -158,8 +158,7 @@ namespace msgpack {
             else if (type == Type::INT64) value = unpackInt64();
             else
             {
-                // TODO: error handling
-
+                LOG_WARNING("unpack type is not matched :", (int)type);
                 value = 0;
                 ++curr_index;
             }
@@ -182,8 +181,7 @@ namespace msgpack {
             else if (type == Type::FLOAT64) value = unpackFloat64();
             else
             {
-                // TODO: error handling
-
+                LOG_WARNING("unpack type is not matched :", (int)type);
                 value = 0.0;
                 ++curr_index;
             }
@@ -204,8 +202,7 @@ namespace msgpack {
             else if (type == Type::STR32) str = unpackString32();
             else
             {
-                // TODO: error handling
-
+                LOG_WARNING("unpack type is not matched :", (int)type);
                 str = "";
                 ++curr_index;
             }
@@ -283,14 +280,11 @@ namespace msgpack {
             const size_t size = unpackArraySize();
             if (N == size)
             {
-                for (auto& a : arr)
-                {
-                    unpack(a);
-                }
+                for (auto& a : arr) unpack(a);
             }
             else
             {
-                // TODO: error handling
+                LOG_WARNING("unpack array size is not matched :", size, "must be", N);
             }
         }
 
@@ -312,7 +306,7 @@ namespace msgpack {
             }
             else
             {
-                // TODO: error handling
+                LOG_WARNING("unpack array size is not matched :", size, "must be", 1);
             }
         }
 
@@ -326,7 +320,7 @@ namespace msgpack {
             }
             else
             {
-                // TODO: error handling
+                LOG_WARNING("unpack array size is not matched :", size, "must be", sizeof...(Args));
             }
         }
 
@@ -343,14 +337,11 @@ namespace msgpack {
             const size_t size = unpackArraySize();
             if (arr_size == size)
             {
-                for (auto& a : arr)
-                {
-                    unpack(a);
-                }
+                for (auto& a : arr) unpack(a);
             }
             else if (size == 0)
             {
-                // TODO: error handling
+                LOG_WARNING("unpack array size is not matched :", size, "must be", arr_size);
             }
             else
             {
@@ -1253,7 +1244,7 @@ private:
             }
             else if (size == 0)
             {
-                // TODO: error handling
+                LOG_WARNING("unpack array size is not matched :", size, "must be", arr.size());
             }
             else
             {
@@ -1277,7 +1268,7 @@ private:
             const size_t size = unpackArraySize();
             if (size == 0)
             {
-                // TODO: error handling
+                LOG_WARNING("unpack array size is not matched :", size, "must be", arr.size());
             }
             else
             {
@@ -1302,7 +1293,7 @@ private:
             const size_t size = unpackMapSize();
             if (size == 0)
             {
-                // TODO: error handling
+                LOG_WARNING("unpack map size is not matched :", size, "must be", mp.size());
             }
             else
             {
