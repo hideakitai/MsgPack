@@ -735,7 +735,7 @@ int main ()
             // bin8_p, bin16_p, bin32_p,
             bin8_vi, bin8_vu, bin8_ai, bin8_au,
             arr_v, arr_a, arr_d, arr_p,
-            // arr_tp,
+            arr_tp,
             arr_l, arr_fl, arr_s, arr_us, arr_ms, arr_ums,
             m, um, mm, umm
         );
@@ -777,7 +777,7 @@ int main ()
         std::array<int, 5> r_arr_a;
         std::deque<int> r_arr_d;
         std::pair<std::string, int> r_arr_p;
-        // std::tuple<int, float, std::string> r_arr_tp; // TODO:
+        std::tuple<int, float, std::string> r_arr_tp;
         std::list<int> r_arr_l;
         std::forward_list<int> r_arr_fl;
         std::set<int> r_arr_s;
@@ -801,7 +801,7 @@ int main ()
             // r_bin8_p, r_bin16_p, r_bin32_p,
             r_bin8_vi, r_bin8_vu, r_bin8_ai, r_bin8_au,
             r_arr_v, r_arr_a, r_arr_d, r_arr_p,
-            // r_arr_tp,
+            r_arr_tp,
             r_arr_l, r_arr_fl, r_arr_s, r_arr_us, r_arr_ms, r_arr_ums,
             r_m, r_um, r_mm, r_umm
         );
@@ -843,7 +843,7 @@ int main ()
         assert(r_arr_a == arr_a);
         assert(r_arr_d == arr_d);
         assert(r_arr_p == arr_p);
-        // assert(r_arr_tp == arr_tp);
+        assert(r_arr_tp == arr_tp);
         assert(r_arr_l == arr_l);
         assert(r_arr_fl == arr_fl);
         assert(r_arr_s == arr_s);
