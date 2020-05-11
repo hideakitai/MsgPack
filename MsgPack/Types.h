@@ -72,12 +72,18 @@ namespace msgpack {
 
     namespace object
     {
-        class NIL
+        class nil
         {
             bool is_nil {false};
-            NIL& operator=(const NIL& rhs) { this->is_nil = rhs.is_nil; return *this; }
-            NIL& operator=(const bool b) { this->is_nil = b; return *this; }
+            nil& operator=(const nil& rhs) { this->is_nil = rhs.is_nil; return *this; }
+            nil& operator=(const bool b) { this->is_nil = b; return *this; }
             bool operator()() const { return this->is_nil; }
+        };
+
+        class timestamp
+        {
+            long tv_sec;  // seconds
+            long tv_nsec; // nanoseconds
         };
     }
     enum class Type : uint8_t

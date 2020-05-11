@@ -72,7 +72,7 @@ namespace msgpack {
         template <typename T>
         auto pack(const T& n)
         -> typename std::enable_if<
-            std::is_same<T, object::NIL>::value ||
+            std::is_same<T, object::nil>::value ||
             std::is_same<T, std::nullptr_t>::value
         >::type
         {
