@@ -22,9 +22,10 @@ void setup()
     PRINT("this is for debug");
     PRINTLN(1, 2.2, "you can", "print variable args")
 
-    LOG_SET_LEVEL(Debug::LogLevel::ERROR); // only ERROR log is printed
-    LOG_SET_LEVEL(Debug::LogLevel::WARNING); // ERROR and WARNING is printed
-    LOG_SET_LEVEL(Debug::LogLevel::VERBOSE); // all log is printed
+    // default: DebugLogLevel::VERBOSE
+    LOG_SET_LEVEL(DebugLogLevel::ERROR); // only ERROR log is printed
+    LOG_SET_LEVEL(DebugLogLevel::WARNING); // ERROR and WARNING is printed
+    LOG_SET_LEVEL(DebugLogLevel::VERBOSE); // all log is printed
 
     LOG_ERROR("this is error log");
     LOG_WARNING("this is warning log");
