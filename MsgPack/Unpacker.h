@@ -419,10 +419,19 @@ namespace msgpack {
 
 
         // ---------- EXT format family ----------
-        // no pre-defined type
+
+        void unpack(object::ext& e)
+        {
+            e = unpackExt();
+        }
 
 
+        // ---------- TIMESTAMP format family ----------
 
+        void unpack(object::timespec& t)
+        {
+            t = unpackTimestamp();
+        }
 
 
         /////////////////////////////////////////
@@ -774,8 +783,123 @@ namespace msgpack {
 
         // ---------- EXT format family ----------
 
+        object::ext unpackExt()
+        {
+            Type type = getType();
+            if (type == Type::FIXEXT1)
+            {
+                int8_t ext_type = getRawBytes<int8_t>(curr_index, 1);
+                uint8_t* ptr = getRawBytePtr(curr_index++, 2);
+                return std::move(object::ext(ext_type, ptr, 1));
+            }
+            else if (type == Type::FIXEXT2)
+            {
+                int8_t ext_type = getRawBytes<int8_t>(curr_index, 1);
+                uint8_t* ptr = getRawBytePtr(curr_index++, 2);
+                return std::move(object::ext(ext_type, ptr, 2));
+            }
+            else if (type == Type::FIXEXT4)
+            {
+                int8_t ext_type = getRawBytes<int8_t>(curr_index, 1);
+                uint8_t* ptr = getRawBytePtr(curr_index++, 2);
+                return std::move(object::ext(ext_type, ptr, 4));
+            }
+            else if (type == Type::FIXEXT8)
+            {
+                int8_t ext_type = getRawBytes<int8_t>(curr_index, 1);
+                uint8_t* ptr = getRawBytePtr(curr_index++, 2);
+                return std::move(object::ext(ext_type, ptr, 8));
+            }
+            else if (type == Type::FIXEXT16)
+            {
+                int8_t ext_type = getRawBytes<int8_t>(curr_index, 1);
+                uint8_t* ptr = getRawBytePtr(curr_index++, 2);
+                return std::move(object::ext(ext_type, ptr, 16));
+            }
+            else if (type == Type::EXT8)
+            {
+                uint8_t size = getRawBytes<uint8_t>(curr_index, 1);
+                int8_t ext_type = getRawBytes<int8_t>(curr_index, 2);
+                uint8_t* ptr = getRawBytePtr(curr_index++, 3);
+                return std::move(object::ext(ext_type, ptr, size));
+            }
+            else if (type == Type::EXT16)
+            {
+                uint16_t size = getRawBytes<uint16_t>(curr_index, 1);
+                int8_t ext_type = getRawBytes<int8_t>(curr_index, 3);
+                uint8_t* ptr = getRawBytePtr(curr_index++, 4);
+                return std::move(object::ext(ext_type, ptr, size));
+            }
+            else if (type == Type::EXT32)
+            {
+                uint32_t size = getRawBytes<uint32_t>(curr_index, 1);
+                int8_t ext_type = getRawBytes<int8_t>(curr_index, 5);
+                uint8_t* ptr = getRawBytePtr(curr_index++, 6);
+                return std::move(object::ext(ext_type, ptr, size));
+            }
+        }
+
+
         // ---------- TIMESTAMP format family ----------
 
+        object::timespec unpackTimestamp()
+        {
+            Type type = getType();
+            object::timespec ts;
+            if (type == Type::TIMESTAMP32)
+            {
+                int8_t ext_type = getRawBytes<int8_t>(curr_index, 1);
+                if (ext_type == -1)
+                {
+                    ts.tv_nsec = 0;
+                    ts.tv_sec = getRawBytes<uint32_t>(curr_index++, 2);
+                }
+                else
+                {
+                    LOG_WARNING("unpack timestamp ext-type not matched :", (int)ext_type, "must be -1");
+                }
+            }
+            else if (type == Type::TIMESTAMP64)
+            {
+                int8_t ext_type = getRawBytes<int8_t>(curr_index, 1);
+                if (ext_type == -1)
+                {
+                    uint64_t data64 = getRawBytes<uint64_t>(curr_index++, 2);
+                    ts.tv_nsec = data64 >> 34;
+                    ts.tv_sec = data64 & 0x00000003ffffffffL;
+                }
+                else
+                {
+                    LOG_WARNING("unpack timestamp ext-type not matched :", (int)ext_type, "must be -1");
+                }
+            }
+            else if (type == Type::TIMESTAMP96)
+            {
+                uint8_t size = getRawBytes<uint8_t>(curr_index, 1);
+                if (size == 12)
+                {
+                    int8_t ext_type = getRawBytes<int8_t>(curr_index, 2);
+                    if (ext_type == -1)
+                    {
+                        ts.tv_nsec = getRawBytes<uint32_t>(curr_index, 3);
+                        ts.tv_sec = getRawBytes<uint64_t>(curr_index++, 7);
+                    }
+                    else
+                    {
+                        LOG_WARNING("unpack timestamp ext-type not matched :", (int)ext_type, "must be -1");
+                    }
+                }
+                else
+                {
+                    LOG_WARNING("unpack timestamp ext-size not matched :", (int)size, "must be 12");
+                }
+            }
+            else
+            {
+                LOG_WARNING("unpack timestamp object-type not matched :", (int)type);
+            }
+            return std::move(ts);
+        }
 
 
         /////////////////////////////////////////
@@ -1073,7 +1197,7 @@ namespace msgpack {
         }
 
         template <typename T, typename U>
-        bool unpack(const std::unordered_multimap<T, U>& mp) const
+        bool unpackable(const std::unordered_multimap<T, U>& mp) const
         {
             (void)mp;
             Type type = getType();
@@ -1084,7 +1208,24 @@ namespace msgpack {
 
 
         // ---------- EXT format family ----------
-        // no pre-defined type
+
+        bool unpackable(const object::ext& e) const
+        {
+            (void)e;
+            bool b = false;
+            b |= isFixExt1() || isFixExt2() || isFixExt4() || isFixExt8() || isFixExt16();
+            b |= isExt8() || isExt16() || isExt32();
+            return b;
+        }
+
+
+        // ---------- TIMESTAMP format family ----------
+
+        bool unpackable(const object::timespec& t) const
+        {
+            (void)t;
+            return isTimestamp32() || isTimestamp64() || isTimestamp96();
+        }
 
 
 
@@ -1123,25 +1264,31 @@ namespace msgpack {
         bool isExt8() const { return getType() == Type::EXT8; }
         bool isExt16() const { return getType() == Type::EXT16; }
         bool isExt32() const { return getType() == Type::EXT32; }
-        // bool isTimeStamp32() const { return getType() == Type::TIMESTAMP32; }
-        // bool isTimeStamp64() const { return getType() == Type::TIMESTAMP64; }
-        // bool isTimeStamp96() const { return getType() == Type::TIMESTAMP96; }
+        bool isTimestamp32() const { return (getType() == Type::TIMESTAMP32) && (getRawBytes<int8_t>(curr_index, 1) == -1); }
+        bool isTimestamp64() const { return (getType() == Type::TIMESTAMP64) && (getRawBytes<int8_t>(curr_index, 1) == -1); }
+        bool isTimestamp96() const { return (getType() == Type::TIMESTAMP96) && (getRawBytes<int8_t>(curr_index, 2) == -1); }
 
 
 private:
 
         template <typename DataType>
-        DataType getRawBytes(const size_t i, const size_t offset) const
+        DataType getRawBytes(const size_t idx, const size_t offset) const
         {
             DataType data;
             const auto size = sizeof(DataType);
             for (uint8_t b = 0; b < size; ++b)
             {
                 uint8_t distance = size - 1 - b;
-                auto index = indices[i] + offset + distance;
+                auto index = indices[idx] + offset + distance;
                 ((uint8_t*)&data)[b] = raw_data[index];
             }
             return std::move(data);
+        }
+
+        uint8_t* getRawBytePtr(const size_t idx, const size_t offset) const
+        {
+            auto index = indices[idx] + offset;
+            return raw_data + index;
         }
 
         Type getType() const

@@ -72,7 +72,7 @@ namespace msgpack {
 
     namespace object
     {
-        class nil
+        struct nil
         {
             bool is_nil {false};
             nil& operator=(const nil& rhs) { this->is_nil = rhs.is_nil; return *this; }
@@ -80,12 +80,44 @@ namespace msgpack {
             bool operator()() const { return this->is_nil; }
         };
 
-        class timestamp
+        inline bool operator==(const nil& lhs, const nil& rhs) { return lhs() == rhs(); }
+
+        class ext
+        {
+            bin_t<uint8_t> m_data;
+
+        public:
+            ext() : m_data(1, 0) {}
+            ext(int8_t t, const uint8_t* p, uint32_t s)
+            {
+                m_data.reserve(static_cast<size_t>(s) + 1);
+                m_data.push_back(static_cast<uint8_t>(t));
+                m_data.insert(m_data.end(), p, p + s);
+            }
+            ext(int8_t t, uint32_t s)
+            {
+                m_data.resize(static_cast<size_t>(s) + 1);
+                m_data[0] = static_cast<char>(t);
+            }
+            int8_t type() const { return static_cast<int8_t>(m_data[0]); }
+            const uint8_t* data() const { return &m_data[0] + 1; }
+            uint8_t* data() { return &m_data[0] + 1; }
+            uint32_t size() const { return static_cast<uint32_t>(m_data.size()) - 1; }
+            bool operator== (const ext& x) const { return m_data == x.m_data; }
+            bool operator!= (const ext& x) const { return !(*this == x); }
+            bool operator< (const ext& x) const { return m_data < x.m_data; }
+            bool operator> (const ext& x) const { return m_data > x.m_data; }
+        };
+
+        struct timespec
         {
             long tv_sec;  // seconds
             long tv_nsec; // nanoseconds
         };
-    }
+
+    } // namespace object
+
+
     enum class Type : uint8_t
     {
         NA = 0xC1, // never used
