@@ -5,6 +5,9 @@ MessagePack implementation for Arduino (compatible with other C++ apps)
 
 ## Typical Usage
 
+This library is only for serialize / deserialize.
+To send / receive serialized data with `Stream` class, please see [MsgPacketizer](https://github.com/hideakitai/MsgPacketizer).
+
 ``` C++
 #include <MsgPack.h>
 #include <vector>
@@ -183,6 +186,7 @@ I reccomend to use low cost but much better performance chip like ESP series.
 
 - [ArxTypeTraits v0.1.4](https://github.com/hideakitai/ArxTypeTraits)
 - [ArxContainer v0.3.3](https://github.com/hideakitai/ArxContainer)
+- [DebugLog v0.1.3](https://github.com/hideakitai/DebugLog)
 - [TeensyDirtySTLErrorSolution v0.1.0](https://github.com/hideakitai/TeensyDirtySTLErrorSolution)
 
 
