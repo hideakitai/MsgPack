@@ -639,39 +639,183 @@ int main ()
 #else
 #endif
     }
-    // {
-    //     MsgPack::Packer packer;
+    {
+        MsgPack::Packer packer;
 
-    //     // ---------- EXT format family ----------
+        // ---------- EXT format family ----------
 
-    //     // TODO:
-    //     // packer.packFixExt1(-1, 123);
-    //     // packer.packFixExt2(-2, 12345);
-    //     // packer.packFixExt4(-4, 1234567891);
-    //     // packer.packFixExt8(-8, 123456789123456789);
-    //     // packer.packFixExt16(-16, 123456789123456789, 123456789123456789);
-    //     // packer.packExtSize8(-18, 1);
-    //     //     packer.packBool(true);
-    //     // packer.packExtSize16();
-    //     // packer.packExtSize32();
+        uint8_t e1 = 123;
+        uint16_t e2 = 12345;
+        uint32_t e4 = 1234567891;
+        uint64_t e8 = 123456789123456789;
+        union {
+            struct { uint64_t l; uint64_t h; };
+            uint8_t b[sizeof(uint64_t) * 2];
+        } e16_ { e8, e8 };
+        MsgPack::object::ext e16(16, e16_.b, sizeof(e16_));
+        union {
+            struct { uint64_t ll; uint64_t lh; uint64_t hl; uint64_t hh; };
+            uint8_t b[sizeof(uint64_t) * 4];
+        } e32_ { e8, e8, e8, e8 };
+        MsgPack::object::ext e32(32, e32_.b, sizeof(e32_));
+        uint8_t es8[123];
+        for (auto& e : es8) e = 8;
+        uint8_t es16[12345];
+        for (auto& e : es16) e = 16;
+        // uint8_t es32[1234567891];
+        // for (auto& e : es32) e = 32;
 
-    //     // ---------- TIMESTAMP format family ----------
+        packer.packFixExt1(1, e1);
+        packer.packFixExt2(2, e2);
+        packer.packFixExt4(4, e4);
+        packer.packFixExt8(8, e8);
+        packer.packFixExt16(16, e8, e8);
 
-    //     // TODO:
-    //     // packer.packTimestamp32();
-    //     // packer.packTimestamp64();
-    //     // packer.packTimestamp96();
+        // packer.packFixExt1(1, &e1, sizeof(e1));
+        packer.packFixExt2(2, &e2);
+        packer.packFixExt4(4, &e4);
+        packer.packFixExt8(8, &e8);
+        packer.packFixExt16(16, e16.data());
 
+        packer.packFixExt(1, e1);
+        packer.packFixExt(2, e2);
+        packer.packFixExt(4, e4);
+        packer.packFixExt(8, e8);
+        packer.packFixExt(16, e8, e8);
 
-    //     MsgPack::Unpacker unpacker;
-    //     unpacker.feed(packer.data(), packer.size());
+        packer.packFixExt(1, &e1, sizeof(e1));
+        packer.packFixExt(2, &e2, sizeof(e2));
+        packer.packFixExt(4, &e4, sizeof(e4));
+        packer.packFixExt(8, &e8, sizeof(e8));
+        packer.packFixExt(16, e16.data(), e16.size());
 
+        packer.packExt(1, &e1, sizeof(e1));
+        packer.packExt(2, &e2, sizeof(e2));
+        packer.packExt(4, &e4, sizeof(e4));
+        packer.packExt(8, &e8, sizeof(e8));
+        packer.packExt(16, e16.data(), e16.size());
+        packer.packExt(18, es8, sizeof(es8));
+        packer.packExt(116, es16, sizeof(es16));
+        // packer.packExt(32, es32, sizeof(es32));
 
+        MsgPack::Unpacker unpacker;
+        unpacker.feed(packer.data(), packer.size());
 
-    // }
+        MsgPack::object::ext r_e1, r_e2, r_e4, r_e8, r_e16, r_e32;
+        MsgPack::object::ext r_es8, r_es16, r_es32;
+
+        MsgPack::object::ext p_e1(1, (const uint8_t*)&e1, sizeof(e1));
+        MsgPack::object::ext p_e2(2, (const uint8_t*)&e2, sizeof(e2));
+        MsgPack::object::ext p_e4(4, (const uint8_t*)&e4, sizeof(e4));
+        MsgPack::object::ext p_e8(8, (const uint8_t*)&e8, sizeof(e8));
+        // MsgPack::object::ext p_e16;
+        // MsgPack::object::ext p_e32;
+        MsgPack::object::ext p_es8 {18, es8, sizeof(es8)};
+        MsgPack::object::ext p_es16 {116, es16, sizeof(es16)};
+        // MsgPack::object::ext p_es32 {32, es32, sizeof(es32)};
+
+        unpacker.unpack(r_e1);
+        unpacker.unpack(r_e2);
+        unpacker.unpack(r_e4);
+        unpacker.unpack(r_e8);
+        unpacker.unpack(r_e16);
+        assert(r_e1 == p_e1);
+        assert(r_e2 == p_e2);
+        assert(r_e4 == p_e4);
+        assert(r_e8 == p_e8);
+        assert(r_e16 == e16);
+
+        // unpacker.unpack(r_e1);
+        unpacker.unpack(r_e2);
+        unpacker.unpack(r_e4);
+        unpacker.unpack(r_e8);
+        unpacker.unpack(r_e16);
+        assert(r_e2 == p_e2);
+        assert(r_e4 == p_e4);
+        assert(r_e8 == p_e8);
+        assert(r_e16 == e16);
+
+        unpacker.unpack(r_e1);
+        unpacker.unpack(r_e2);
+        unpacker.unpack(r_e4);
+        unpacker.unpack(r_e8);
+        unpacker.unpack(r_e16);
+        assert(r_e1 == p_e1);
+        assert(r_e2 == p_e2);
+        assert(r_e4 == p_e4);
+        assert(r_e8 == p_e8);
+        assert(r_e16 == e16);
+
+        unpacker.unpack(r_e1);
+        unpacker.unpack(r_e2);
+        unpacker.unpack(r_e4);
+        unpacker.unpack(r_e8);
+        unpacker.unpack(r_e16);
+        assert(r_e1 == p_e1);
+        assert(r_e2 == p_e2);
+        assert(r_e4 == p_e4);
+        assert(r_e8 == p_e8);
+        assert(r_e16 == e16);
+
+        unpacker.unpack(r_e1);
+        unpacker.unpack(r_e2);
+        unpacker.unpack(r_e4);
+        unpacker.unpack(r_e8);
+        unpacker.unpack(r_e16);
+        unpacker.unpack(r_es8);
+        unpacker.unpack(r_es16);
+        // unpacker.unpack(r_es32);
+        assert(r_e1 == p_e1);
+        assert(r_e2 == p_e2);
+        assert(r_e4 == p_e4);
+        assert(r_e8 == p_e8);
+        assert(r_e16 == e16);
+        assert(r_es8 == p_es8);
+        assert(r_es16 == p_es16);
+        // assert(r_es32 == p_es32);
+    }
 
     // timestamp
     {
+        // ---------- TIMESTAMP format family ----------
+
+        MsgPack::object::timespec tv32 { 12345, 0 };
+        MsgPack::object::timespec tv64 { 17179869180, 1073741820 };
+        uint64_t utime64 = ((tv64.tv_nsec & 0x00000003FFFFFFFF) << 34) | (uint64_t)(tv64.tv_sec & 0x3FFFFFFFF);
+        MsgPack::object::timespec tv96 { 18000000000, 1100000000 };
+
+        MsgPack::Packer packer;
+
+        packer.packTimestamp32(tv32.tv_sec);
+        packer.packTimestamp64(utime64);
+        packer.packTimestamp64(tv64.tv_sec, tv64.tv_nsec);
+        packer.packTimestamp96(tv96.tv_sec, tv96.tv_nsec);
+
+        packer.packTimestamp(tv32);
+        packer.packTimestamp(tv64);
+        packer.packTimestamp(tv96);
+
+
+        MsgPack::object::timespec r_tv32, r_tv64, r_tv96;
+
+        MsgPack::Unpacker unpacker;
+        unpacker.feed(packer.data(), packer.size());
+
+        unpacker.unpack(r_tv32);
+        assert(r_tv32 == tv32);
+        unpacker.unpack(r_tv64);
+        assert(r_tv64 == tv64);
+        unpacker.unpack(r_tv64);
+        assert(r_tv64 == tv64);
+        unpacker.unpack(r_tv96);
+        assert(r_tv96 == tv96);
+
+        unpacker.unpack(r_tv32);
+        assert(r_tv32 == tv32);
+        unpacker.unpack(r_tv64);
+        assert(r_tv64 == tv64);
+        unpacker.unpack(r_tv96);
+        assert(r_tv96 == tv96);
     }
 
 
