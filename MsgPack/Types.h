@@ -78,15 +78,15 @@ namespace msgpack {
             nil& operator=(const nil& rhs) { this->is_nil = rhs.is_nil; return *this; }
             nil& operator=(const bool b) { this->is_nil = b; return *this; }
             bool operator()() const { return this->is_nil; }
+            bool operator==(const nil& x) { return (*this)() == x(); }
         };
-
-        inline bool operator==(const nil& lhs, const nil& rhs) { return lhs() == rhs(); }
 
         class ext
         {
             bin_t<uint8_t> m_data;
 
         public:
+
             ext() : m_data(1, 0) {}
             ext(int8_t t, const uint8_t* p, uint32_t s)
             {
@@ -100,8 +100,8 @@ namespace msgpack {
                 m_data[0] = static_cast<char>(t);
             }
             int8_t type() const { return static_cast<int8_t>(m_data[0]); }
-            const uint8_t* data() const { return &m_data[0] + 1; }
-            uint8_t* data() { return &m_data[0] + 1; }
+            const uint8_t* data() const { return &(m_data[0]) + 1; }
+            uint8_t* data() { return &(m_data[0]) + 1; }
             uint32_t size() const { return static_cast<uint32_t>(m_data.size()) - 1; }
             bool operator== (const ext& x) const { return m_data == x.m_data; }
             bool operator!= (const ext& x) const { return !(*this == x); }
@@ -113,6 +113,16 @@ namespace msgpack {
         {
             long tv_sec;  // seconds
             long tv_nsec; // nanoseconds
+
+            bool operator== (const timespec& x) const { return (tv_sec == x.tv_sec) && (tv_nsec == x.tv_nsec); }
+            bool operator!= (const timespec& x) const { return !(*this == x); }
+            bool operator< (const timespec& x) const
+            {
+                if      (tv_sec < x.tv_sec) return true;
+                else if (tv_sec > x.tv_sec) return false;
+                else                        return tv_nsec < x.tv_nsec;
+            }
+            bool operator> (const timespec& x) const { return (*this != x) && (*this < x); }
         };
 
     } // namespace object

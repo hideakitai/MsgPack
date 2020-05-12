@@ -651,57 +651,77 @@ namespace msgpack {
         {
             packRawByte(Type::FIXEXT2);
             packRawByte((uint8_t)type);
-            packRawReversed(value);
+            packRawBytes((const uint8_t*)&value, sizeof(value));
         }
 
         void packFixExt2(const int8_t type, const uint8_t* ptr)
         {
             packRawByte(Type::FIXEXT2);
             packRawByte((uint8_t)type);
-            packRawBytesReversed((const char*)ptr, 2);
+            packRawBytes((const uint8_t*)ptr, 2);
+        }
+
+        void packFixExt2(const int8_t type, const uint16_t* ptr)
+        {
+            packFixExt2(type, (const uint8_t*)ptr);
         }
 
         void packFixExt4(const int8_t type, const uint32_t value)
         {
             packRawByte(Type::FIXEXT4);
             packRawByte((uint8_t)type);
-            packRawReversed(value);
+            packRawBytes((const uint8_t*)&value, sizeof(value));
         }
 
         void packFixExt4(const int8_t type, const uint8_t* ptr)
         {
             packRawByte(Type::FIXEXT4);
             packRawByte((uint8_t)type);
-            packRawBytesReversed((const char*)ptr, 4);
+            packRawBytes((const uint8_t*)ptr, 4);
+        }
+
+        void packFixExt4(const int8_t type, const uint32_t* ptr)
+        {
+            packFixExt4(type, (const uint8_t*)ptr);
         }
 
         void packFixExt8(const int8_t type, const uint64_t value)
         {
             packRawByte(Type::FIXEXT8);
             packRawByte((uint8_t)type);
-            packRawReversed(value);
+            packRawBytes((const uint8_t*)&value, sizeof(value));
         }
 
         void packFixExt8(const int8_t type, const uint8_t* ptr)
         {
             packRawByte(Type::FIXEXT8);
             packRawByte((uint8_t)type);
-            packRawBytesReversed((const char*)ptr, 8);
+            packRawBytes((const uint8_t*)ptr, 8);
+        }
+
+        void packFixExt8(const int8_t type, const uint64_t* ptr)
+        {
+            packFixExt8(type, (const uint8_t*)ptr);
         }
 
         void packFixExt16(const int8_t type, const uint64_t value_h, const uint64_t value_l)
         {
             packRawByte(Type::FIXEXT16);
             packRawByte((uint8_t)type);
-            packRawReversed(value_h);
-            packRawReversed(value_l);
+            packRawBytes((const uint8_t*)&value_h, sizeof(value_h));
+            packRawBytes((const uint8_t*)&value_l, sizeof(value_l));
         }
 
         void packFixExt16(const int8_t type, const uint8_t* ptr)
         {
             packRawByte(Type::FIXEXT16);
             packRawByte((uint8_t)type);
-            packRawBytesReversed((const char*)ptr, 16);
+            packRawBytes((const uint8_t*)ptr, 16);
+        }
+
+        void packFixExt16(const int8_t type, const uint64_t* ptr)
+        {
+            packFixExt16(type, (const uint8_t*)ptr);
         }
 
         template <typename T>
@@ -730,6 +750,21 @@ namespace msgpack {
             else if (size <= sizeof(uint64_t) * 2) packFixExt16(type, ptr);
         }
 
+        void packFixExt(const int8_t type, const uint16_t* ptr, const uint8_t size)
+        {
+            packFixExt(type, (const uint8_t*)ptr, size);
+        }
+
+        void packFixExt(const int8_t type, const uint32_t* ptr, const uint8_t size)
+        {
+            packFixExt(type, (const uint8_t*)ptr, size);
+        }
+
+        void packFixExt(const int8_t type, const uint64_t* ptr, const uint8_t size)
+        {
+            packFixExt(type, (const uint8_t*)ptr, size);
+        }
+
         void packExtSize8(const int8_t type, const uint8_t size)
         {
             packRawByte(Type::EXT8);
@@ -751,9 +786,9 @@ namespace msgpack {
             packRawByte((uint8_t)type);
         }
 
-        template <typename T>
-        auto packExt(const int8_t type, const uint8_t* ptr, const T size)
-        -> typename std::enable_if<std::is_integral<T>::value>::type
+        template <typename T, typename U>
+        auto packExt(const int8_t type, const T* ptr, const U size)
+        -> typename std::enable_if<std::is_integral<T>::value && std::is_integral<U>::value>::type
         {
             if (size <= sizeof(uint64_t) * 2)
                 packFixExt(type, ptr, size);
@@ -765,7 +800,7 @@ namespace msgpack {
                     packExtSize16(type, size);
                 else if (size <= std::numeric_limits<uint32_t>::max())
                     packExtSize32(type, size);
-                packRawBytesReversed(ptr, size);
+                packRawBytes((const uint8_t*)ptr, size);
             }
         }
 
@@ -779,17 +814,21 @@ namespace msgpack {
 
         void packTimestamp32(const uint32_t unix_time_sec)
         {
-            packFixExt4(-1, unix_time_sec);
+            packRawByte(Type::FIXEXT4);
+            packRawByte((uint8_t)-1);
+            packRawReversed(unix_time_sec);
         }
 
         void packTimestamp64(const uint64_t unix_time)
         {
-            packFixExt8(-1, unix_time);
+            packRawByte(Type::FIXEXT8);
+            packRawByte((uint8_t)-1);
+            packRawReversed(unix_time);
         }
 
         void packTimestamp64(const uint64_t unix_time_sec, const uint32_t unix_time_nsec)
         {
-            uint64_t utime = ((unix_time_sec & 0x00000003FFFFFFFF) << 30) | (uint64_t)(unix_time_nsec & 0x3FFFFFFF);
+            uint64_t utime = ((unix_time_nsec & 0x00000003FFFFFFFF) << 34) | (uint64_t)(unix_time_sec & 0x3FFFFFFFF);
             packTimestamp64(utime);
         }
 
@@ -837,16 +876,6 @@ namespace msgpack {
         void packRawBytes(const char* value, const size_t size)
         {
             for (size_t i = 0; i < size; ++i) buffer.emplace_back(value[i]);
-        }
-
-        void packRawBytesReversed(const uint8_t* value, const size_t size)
-        {
-            for (size_t i = 0; i < size; ++i) buffer.emplace_back(value[size - 1 - i]);
-        }
-
-        void packRawBytesReversed(const char* value, const size_t size)
-        {
-            for (size_t i = 0; i < size; ++i) buffer.emplace_back(value[size - 1 - i]);
         }
 
         template<typename DataType>

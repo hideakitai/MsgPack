@@ -837,6 +837,8 @@ namespace msgpack {
                 uint8_t* ptr = getRawBytePtr(curr_index++, 6);
                 return std::move(object::ext(ext_type, ptr, size));
             }
+
+            return std::move(object::ext());
         }
 
 
@@ -1110,7 +1112,13 @@ namespace msgpack {
             return ((type == Type::ARRAY4) || (type == Type::ARRAY16) || (type == Type::ARRAY32));
         }
 
-        // std::tuple???
+        template <typename... Args>
+        bool unpackable(const std::tuple<Args...>& arr) const
+        {
+            (void)arr;
+            Type type = getType();
+            return ((type == Type::ARRAY4) || (type == Type::ARRAY16) || (type == Type::ARRAY32));
+        }
 
         template <typename T>
         bool unpackable(const std::list<T>& arr) const
