@@ -37,6 +37,35 @@ uint8_t arr_size4 = 5;
 
 uint8_t map_size4 = 3;
 
+
+struct CustomClassBase
+{
+    int i;
+    float f;
+    MsgPack::str_t s;
+
+    bool operator== (const CustomClassBase& x) const
+    {
+        return (x.i == i) && (x.f == f) && (x.s == s);
+    }
+
+    MSGPACK_DEFINE(i, f, s);
+};
+
+struct CustomClassDerived : public CustomClassBase
+{
+    int ii;
+    float ff;
+    MsgPack::str_t ss;
+
+    bool operator== (const CustomClassDerived& x)
+    {
+        return (x.i == i) && (x.f == f) && (x.s == s) && (x.ii == ii) && (x.ff == ff) && (x.ss == ss);
+    }
+
+    MSGPACK_DEFINE(ii, ff, ss, MSGPACK_BASE(CustomClassBase));
+};
+
 int main ()
 {
     std::cout << "msgpack test start" << std::endl;
@@ -999,6 +1028,48 @@ int main ()
         assert(r_um == um);
         assert(r_mm == mm);
         assert(r_umm == umm);
+    }
+
+    // custom class
+    {
+        CustomClassBase a {1, 2.2, "3.3"};
+        CustomClassBase b {4, 5.5, "6.6"};
+        CustomClassBase c {7, 8.8, "9.9"};
+        CustomClassBase r_a, r_b, r_c;
+
+        CustomClassDerived d;// {1, 2.2, "3.3"};
+        CustomClassDerived e;// {4, 5.5, "6.6"};
+        CustomClassDerived f;// {7, 8.8, "9.9"};
+        CustomClassDerived r_d, r_e, r_f;
+        d.ii = 1; d.ff = 2.2; d.ss = "3.3";
+        d.i = 4; d.f = 5.5; d.s = "6.6";
+        e.ii = 4; e.ff = 5.5; e.ss = "6.6";
+        e.i = 7; e.f = 8.8; e.s = "9.9";
+        f.ii = 7; f.ff = 8.8; f.ss = "9.9";
+        f.i = 1; f.f = 2.2; f.s = "3.3";
+
+        MsgPack::Packer packer;
+        packer.pack(a);
+        packer.pack(b);
+        packer.pack(c);
+        packer.pack(d);
+        packer.pack(e);
+        packer.pack(f);
+
+        MsgPack::Unpacker unpacker;
+        unpacker.feed(packer.data(), packer.size());
+
+        unpacker.decode(r_a, r_b, r_c);
+
+        assert(r_a == a);
+        assert(r_b == b);
+        assert(r_c == c);
+
+        unpacker.decode(r_d, r_e, r_f);
+
+        assert(r_d == d);
+        assert(r_e == e);
+        assert(r_f == f);
     }
 
     std::cout << "test success" << std::endl;
