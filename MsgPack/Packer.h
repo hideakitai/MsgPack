@@ -55,7 +55,7 @@ namespace msgpack {
         const bin_t<uint8_t>& packet() const { return buffer; }
         const uint8_t* data() const { return buffer.data(); }
         size_t size() const { return buffer.size(); }
-        void clear() { buffer.clear(); } //buffer.shrink_to_fit(); }
+        void clear() { buffer.clear(); }
 
 
         /////////////////////////////////////////////////
