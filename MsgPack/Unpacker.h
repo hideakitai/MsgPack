@@ -434,6 +434,16 @@ namespace msgpack {
         }
 
 
+        // ---------- CUSTOM format ----------
+
+        template <typename C>
+        auto unpack(C& c)
+        -> typename std::enable_if<has_from_msgpack<C, Unpacker&>::value>::type
+        {
+            c.from_msgpack(*this);
+        }
+
+
         /////////////////////////////////////////
         // ---------- msgpack types ---------- //
         /////////////////////////////////////////
