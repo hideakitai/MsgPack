@@ -105,14 +105,12 @@ namespace msgpack {
             uint32_t size() const { return static_cast<uint32_t>(m_data.size()) - 1; }
             bool operator== (const ext& x) const { return m_data == x.m_data; }
             bool operator!= (const ext& x) const { return !(*this == x); }
-            bool operator< (const ext& x) const { return m_data < x.m_data; }
-            bool operator> (const ext& x) const { return m_data > x.m_data; }
         };
 
         struct timespec
         {
-            long tv_sec;  // seconds
-            long tv_nsec; // nanoseconds
+            int64_t tv_sec;  // seconds
+            uint32_t tv_nsec; // nanoseconds
 
             bool operator== (const timespec& x) const { return (tv_sec == x.tv_sec) && (tv_nsec == x.tv_nsec); }
             bool operator!= (const timespec& x) const { return !(*this == x); }

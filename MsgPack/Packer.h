@@ -853,7 +853,7 @@ namespace msgpack {
         {
             if ((time.tv_sec >> 34) == 0)
             {
-                uint64_t data64 = (time.tv_nsec << 34) | time.tv_sec;
+                uint64_t data64 = ((uint64_t)time.tv_nsec << 34) | time.tv_sec;
                 if ((data64 & 0xffffffff00000000L) == 0)
                     packTimestamp32((uint32_t)data64);
                 else
