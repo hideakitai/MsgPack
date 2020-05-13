@@ -72,13 +72,13 @@ namespace msgpack {
 
     namespace object
     {
-        struct nil
+        struct nil_t
         {
             bool is_nil {false};
-            nil& operator=(const nil& rhs) { this->is_nil = rhs.is_nil; return *this; }
-            nil& operator=(const bool b) { this->is_nil = b; return *this; }
+            nil_t& operator=(const nil_t& rhs) { this->is_nil = rhs.is_nil; return *this; }
+            nil_t& operator=(const bool b) { this->is_nil = b; return *this; }
             bool operator()() const { return this->is_nil; }
-            bool operator==(const nil& x) { return (*this)() == x(); }
+            bool operator==(const nil_t& x) { return (*this)() == x(); }
         };
 
         class ext
@@ -87,7 +87,7 @@ namespace msgpack {
 
         public:
 
-            ext() : m_data(1, 0) {}
+            ext() : m_data() {}
             ext(int8_t t, const uint8_t* p, uint32_t s)
             {
                 m_data.reserve(static_cast<size_t>(s) + 1);
