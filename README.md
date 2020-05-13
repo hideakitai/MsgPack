@@ -10,8 +10,6 @@ To send / receive serialized data with `Stream` class, please see [MsgPacketizer
 
 ``` C++
 #include <MsgPack.h>
-#include <vector>
-#include <map>
 
 // input to msgpack
 int i = 123;
@@ -184,7 +182,7 @@ I reccomend to use low cost but much better performance chip like ESP series.
 
 ## Embedded Libraries
 
-- [ArxTypeTraits v0.1.4](https://github.com/hideakitai/ArxTypeTraits)
+- [ArxTypeTraits v0.1.5](https://github.com/hideakitai/ArxTypeTraits)
 - [ArxContainer v0.3.3](https://github.com/hideakitai/ArxContainer)
 - [DebugLog v0.1.4](https://github.com/hideakitai/DebugLog)
 - [TeensyDirtySTLErrorSolution v0.1.0](https://github.com/hideakitai/TeensyDirtySTLErrorSolution)
