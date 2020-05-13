@@ -54,11 +54,60 @@ void loop()
 }
 ```
 
+## Custom Class Adaptation
+
+To serialize / deserialize custom type you defined, please use `MSGPACK_DEFINE()` macro inside of your class.
+
+``` C++
+struct CustomClass
+{
+    int i;
+    float f;
+    MsgPack::str_t s;
+
+    MSGPACK_DEFINE(i, f, s);
+};
+```
+
+After that, you can pack your class completely same as other types.
+
+``` C++
+int i;
+float f;
+MsgPack::str_t s;
+CustomClass c;
+
+MsgPack::Packer packer;
+packer.encode(i, f, s, c); // -> packer.encode(i, f, s, c.i, c.f, c.s)
+```
+
+### Custom Class with Inheritance
+
+Also you can use `MSGPACK_BASE()` macro to pack values of base class.
+
+``` C++
+struct Base
+{
+    int i;
+    float f;
+
+    MSGPACK_DEFINE(i, f);
+};
+
+struct Derived : public Base
+{
+    MsgPack::str_t s;
+
+    MSGPACK_DEFINE(s, MSGPACK_BASE(Base)); // -> packer.encode(s, Base::i, Base::f)
+};
+```
+
+
 ## Type Adaptors
 
 ### NIL
 
-N/A
+- `MsgPack::object::nil_t`
 
 ### Bool
 
@@ -78,21 +127,21 @@ N/A
 
 - `char*`
 - `char[]`
-- `std::string`
+- `std::string` or `String(Arduino)` (`MsgPack::str_t`)
 
 ### Bin
 
 - `unsigned char*`
 - `unsigned char[]`
-- `std::vector<char>`
-- `std::vector<unsigned char>`
+- `std::vector<char>` (`MsgPack::bin_t<char>`)
+- `std::vector<unsigned char>` (`MsgPack::bin_t<unsigned char>`)
 - `std::array<char>`
 - `std::array<unsigned char>`
 
 ### Array
 
 - `T[]`
-- `std::vector`
+- `std::vector` (`MsgPack::arr_t<T>`)
 - `std::array`
 - `std::deque`
 - `std::pair`
@@ -106,18 +155,18 @@ N/A
 
 ### Map
 
-- `std::map`
+- `std::map` (`MsgPack::map_t<T>`)
 - `std::multimap`
 - `std::unordered_map`
 - `std::unordered_multimap`
 
 ### Ext
 
-N/A
+- `MsgPack::object::ext`
 
 ### TimeStamp
 
-N/A
+- `MsgPack::object::timespec`
 
 ### N/A
 
