@@ -6,7 +6,7 @@ MessagePack implementation for Arduino (compatible with other C++ apps)
 ## Typical Usage
 
 This library is only for serialize / deserialize.
-To send / receive serialized data with `Stream` class, please see [MsgPacketizer](https://github.com/hideakitai/MsgPacketizer).
+To send / receive serialized data with `Stream` class, please use [MsgPacketizer](https://github.com/hideakitai/MsgPacketizer).
 
 ``` C++
 #include <MsgPack.h>
@@ -188,10 +188,9 @@ I reccomend to use low cost but much better performance chip like ESP series.
 - [TeensyDirtySTLErrorSolution v0.1.0](https://github.com/hideakitai/TeensyDirtySTLErrorSolution)
 
 
-## TODO
+## Used Inside of
 
-- suport EXT format and custom class
-- suport Timestamp format
+- [MsgPacketizer](https://github.com/hideakitai/MsgPacketizer)
 
 
 ## Reference
