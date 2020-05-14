@@ -31,14 +31,14 @@ void setup()
     Serial.println("msgpack test start");
 
     MsgPack::Packer packer;
-    packer.encode(i, f, s, v, m);
+    packer.serialize(i, f, s, v, m);
 
     // you can also get serialized binary buffer
     // const MsgPack::bin_t<uint8_t>& packet = packer.packet();
 
     MsgPack::Unpacker unpacker;
     unpacker.feed(packer.data(), packer.size());
-    unpacker.decode(ri, rf, rs, rv, rm);
+    unpacker.deserialize(ri, rf, rs, rv, rm);
 
     if (i != ri) Serial.println("failed: int");
     if (f != rf) Serial.println("failed: float");

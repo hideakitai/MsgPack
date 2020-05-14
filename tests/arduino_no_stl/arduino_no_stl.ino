@@ -113,11 +113,11 @@ void setup()
 
         // ---------- INT format family ----------
 
-        packer.packIntU7(12);
-        packer.packIntU8(234);
-        packer.packIntU16(12345);
-        packer.packIntU32(1234567891);
-        packer.packIntU64(1234567891234567891);
+        packer.packUInt7(12);
+        packer.packUInt8(234);
+        packer.packUInt16(12345);
+        packer.packUInt32(1234567891);
+        packer.packUInt64(1234567891234567891);
         packer.packInt5(-12);
         packer.packInt8(-123);
         packer.packInt16(-12345);
@@ -148,12 +148,12 @@ void setup()
 
         // ---------- INT format family ----------
 
-        packer.packIntU7(intu7);
-        packer.packIntU8(intu8);
-        packer.packIntU16(intu16);
-        packer.packIntU32(intu32);
+        packer.packUInt7(intu7);
+        packer.packUInt8(intu8);
+        packer.packUInt16(intu16);
+        packer.packUInt32(intu32);
         // TODO:
-        packer.packIntU64(intu64);
+        packer.packUInt64(intu64);
         packer.packInt5(int5);
         packer.packInt8(int8);
         packer.packInt16(int16);
@@ -190,21 +190,21 @@ void setup()
         MsgPack::Unpacker unpacker;
         unpacker.feed(packer.data(), packer.size());
 
-        assert(unpacker.unpackIntU7() == intu7);
-        assert(unpacker.unpackIntU8() == intu8);
-        assert(unpacker.unpackIntU16() == intu16);
-        assert(unpacker.unpackIntU32() == intu32);
-        assert(unpacker.unpackIntU64() == intu64);
+        assert(unpacker.unpackUInt7() == intu7);
+        assert(unpacker.unpackUInt8() == intu8);
+        assert(unpacker.unpackUInt16() == intu16);
+        assert(unpacker.unpackUInt32() == intu32);
+        assert(unpacker.unpackUInt64() == intu64);
         assert(unpacker.unpackInt5() == int5);
         assert(unpacker.unpackInt8() == int8);
         assert(unpacker.unpackInt16() == int16);
         assert(unpacker.unpackInt32() == int32);
         assert(unpacker.unpackInt64() == int64);
-        assert(unpacker.unpackIntU7() == intu7);
-        assert(unpacker.unpackIntU8() == intu8);
-        assert(unpacker.unpackIntU16() == intu16);
-        assert(unpacker.unpackIntU32() == intu32);
-        assert(unpacker.unpackIntU64() == intu64);
+        assert(unpacker.unpackUInt7() == intu7);
+        assert(unpacker.unpackUInt8() == intu8);
+        assert(unpacker.unpackUInt16() == intu16);
+        assert(unpacker.unpackUInt32() == intu32);
+        assert(unpacker.unpackUInt64() == intu64);
         assert(unpacker.unpackInt5() == int5);
         assert(unpacker.unpackInt8() == int8);
         assert(unpacker.unpackInt16() == int16);
@@ -215,21 +215,21 @@ void setup()
         assert(unpacker.unpackFloat32() == f);
         assert(unpacker.unpackFloat64() == d);
 
-        assert(unpacker.unpackIntU7() == intu7);
-        assert(unpacker.unpackIntU8() == intu8);
-        assert(unpacker.unpackIntU16() == intu16);
-        assert(unpacker.unpackIntU32() == intu32);
-        assert(unpacker.unpackIntU64() == intu64);
+        assert(unpacker.unpackUInt7() == intu7);
+        assert(unpacker.unpackUInt8() == intu8);
+        assert(unpacker.unpackUInt16() == intu16);
+        assert(unpacker.unpackUInt32() == intu32);
+        assert(unpacker.unpackUInt64() == intu64);
         assert(unpacker.unpackInt5() == int5);
         assert(unpacker.unpackInt8() == int8);
         assert(unpacker.unpackInt16() == int16);
         assert(unpacker.unpackInt32() == int32);
         assert(unpacker.unpackInt64() == int64);
-        assert(unpacker.unpackIntU7() == intu7);
-        assert(unpacker.unpackIntU8() == intu8);
-        assert(unpacker.unpackIntU16() == intu16);
-        assert(unpacker.unpackIntU32() == intu32);
-        assert(unpacker.unpackIntU64() == intu64);
+        assert(unpacker.unpackUInt7() == intu7);
+        assert(unpacker.unpackUInt8() == intu8);
+        assert(unpacker.unpackUInt16() == intu16);
+        assert(unpacker.unpackUInt32() == intu32);
+        assert(unpacker.unpackUInt64() == intu64);
         assert(unpacker.unpackInt5() == int5);
         assert(unpacker.unpackInt8() == int8);
         assert(unpacker.unpackInt16() == int16);
@@ -356,9 +356,9 @@ void setup()
         // ---------- ARRAY format family ----------
 
         packer.packArraySize4(arr_size4);
-            packer.packIntU7(intu7);
+            packer.packUInt7(intu7);
             packer.packInt5(int5);
-            packer.packIntU8(intu8);
+            packer.packUInt8(intu8);
             packer.packInt8(int8);
             packer.packString5(str5);
         // TODO:
@@ -370,9 +370,9 @@ void setup()
         unpacker.feed(packer.data(), packer.size());
 
         assert(unpacker.unpackArraySize() == arr_size4);
-            assert(unpacker.unpackIntU7() == intu7);
+            assert(unpacker.unpackUInt7() == intu7);
             assert(unpacker.unpackInt5() == int5);
-            assert(unpacker.unpackIntU8() == intu8);
+            assert(unpacker.unpackUInt8() == intu8);
             assert(unpacker.unpackInt8() == int8);
             assert(unpacker.unpackString5() == MsgPack::str_t(str5));
         // TODO:
@@ -386,7 +386,7 @@ void setup()
 
         packer.packMapSize4(map_size4);
             packer.packString5(str5);
-            packer.packIntU7(intu7);
+            packer.packUInt7(intu7);
             packer.packString5(str5);
             packer.packInt5(int5);
             packer.packString5(str5);
@@ -401,7 +401,7 @@ void setup()
 
         assert(unpacker.unpackMapSize() == map_size4);
             assert(unpacker.unpackString5() == MsgPack::str_t(str5));
-            assert(unpacker.unpackIntU7() == intu7);
+            assert(unpacker.unpackUInt7() == intu7);
             assert(unpacker.unpackString5() == MsgPack::str_t(str5));
             assert(unpacker.unpackInt5() == int5);
             assert(unpacker.unpackString5() == MsgPack::str_t(str5));

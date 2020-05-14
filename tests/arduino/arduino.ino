@@ -98,7 +98,7 @@ void setup()
         // std::unordered_multimap<String, int> umm {{"1", 1}, {"2", 2}, {"3", 3}, {"4", 4}, {"5", 5}};
 
         MsgPack::Packer packer;
-        packer.encode(
+        packer.serialize(
             b1, b2,
             i5, u7, i8, i16, i32, i64, u8, u16, u32, u64,
             f, d,
@@ -170,7 +170,7 @@ void setup()
         MsgPack::Unpacker unpacker;
         unpacker.feed(packer.data(), packer.size());
 
-        unpacker.decode(
+        unpacker.deserialize(
             r_b1, r_b2,
             r_i5, r_u7, r_i8, r_i16, r_i32, r_i64, r_u8, r_u16, r_u32, r_u64,
             r_f, r_d,
