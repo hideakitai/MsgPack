@@ -327,6 +327,7 @@ void pack<T>(const T* ptr, const size_t size) // only for pointer types
 const bin_t<uint8_t>& packet() const
 const uint8_t* data() const
 size_t size() const
+size_t indices() const
 void clear()
 
 void packNil()
