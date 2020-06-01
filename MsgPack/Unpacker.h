@@ -45,7 +45,7 @@ namespace msgpack {
 
     public:
 
-        bool feed(const uint8_t* data, size_t size)
+        bool feed(const uint8_t* data, const size_t size)
         {
             raw_data = (uint8_t*)data;
             for (size_t i = 0; i < size; i += getElementSize(indices.size() - 1))
@@ -60,20 +60,69 @@ namespace msgpack {
             unpack(first);
             deserialize(std::forward<Rest>(rest)...);
         }
+
         void deserialize() {}
 
-        template <typename... Ts>
-        void deserializeToTuple(std::tuple<Ts...>& t)
+        template <typename ...Args>
+        void deserialize(const arr_size_t& arr_size, Args&&... args)
         {
-            deserializeToTuple(std::make_index_sequence<sizeof...(Ts)>(), t);
+            size_t size = unpackArraySize();
+            if (size == arr_size.size())
+            {
+                deserialize(std::forward<Args>(args)...);
+            }
+            else
+            {
+                LOG_WARNING("unpack array size is not matched :", arr_size.size(), "must be", size);
+            }
+        }
+
+        template <typename ...Args>
+        void deserialize(const map_size_t& map_size, Args&&... args)
+        {
+            size_t size = unpackMapSize();
+            if (size == map_size.size())
+            {
+                deserialize(std::forward<Args>(args)...);
+            }
+            else
+            {
+                LOG_WARNING("unpack map size is not matched :", map_size.size(), "must be", size);
+            }
+        }
+
+        template <typename ...Args>
+        void from_array(Args&&... args)
+        {
+            deserialize(arr_size_t(sizeof...(args)), std::forward<Args>(args)...);
+        }
+
+        template <typename ...Args>
+        void from_map(Args&&... args)
+        {
+            size_t size = sizeof...(args);
+            if ((size % 2) == 0)
+            {
+                deserialize(map_size_t(size / 2), std::forward<Args>(args)...);
+            }
+            else
+            {
+                LOG_WARNING("serialize arg size not matched for map :", size);
+            }
+        }
+
+        template <typename... Ts>
+        void to_tuple(std::tuple<Ts...>& t)
+        {
+            to_tuple(std::make_index_sequence<sizeof...(Ts)>(), t);
         }
         template <typename... Ts, size_t... Is>
-        void deserializeToTuple(std::index_sequence<Is...>&&, std::tuple<Ts...>& t)
+        void to_tuple(std::index_sequence<Is...>&&, std::tuple<Ts...>& t)
         {
             size_t i {0};
             idx_t {(unpack(std::get<Is>(t)), i++)...};
         }
-        void deserializeToTuple() {}
+        void to_tuple() {}
 
         bool available() const { return b_decoded; }
         size_t size() const { return indices.size(); }
@@ -317,7 +366,7 @@ namespace msgpack {
             const size_t size = unpackArraySize();
             if (sizeof...(Args) == size)
             {
-                deserializeToTuple(t);
+                to_tuple(t);
             }
             else
             {

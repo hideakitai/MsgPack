@@ -54,6 +54,40 @@ namespace msgpack {
         {
         }
 
+        template <typename ...Args>
+        void serialize(const arr_size_t& arr_size, Args&&... args)
+        {
+            packArraySize(arr_size.size());
+            serialize(std::forward<Args>(args)...);
+        }
+
+        template <typename ...Args>
+        void serialize(const map_size_t& map_size, Args&&... args)
+        {
+            packMapSize(map_size.size());
+            serialize(std::forward<Args>(args)...);
+        }
+
+        template <typename ...Args>
+        void to_array(Args&&... args)
+        {
+            serialize(arr_size_t(sizeof...(args)), std::forward<Args>(args)...);
+        }
+
+        template <typename ...Args>
+        void to_map(Args&&... args)
+        {
+            size_t size = sizeof...(args);
+            if ((size % 2) == 0)
+            {
+                serialize(map_size_t(size / 2), std::forward<Args>(args)...);
+            }
+            else
+            {
+                LOG_WARNING("serialize arg size must be even for map :", size);
+            }
+        }
+
         const bin_t<uint8_t>& packet() const { return buffer; }
         const uint8_t* data() const { return buffer.data(); }
         size_t size() const { return buffer.size(); }
