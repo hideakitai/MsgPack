@@ -110,7 +110,7 @@ MsgPack::str_t s;
 CustomClass c;
 
 MsgPack::Packer packer;
-packer.serialize(i, f, s, c); 
+packer.serialize(i, f, s, c);
 // -> packer.serialize(i, f, s, arr_size_t(3), c.i, c.f, c.s)
 
 int ii;
@@ -136,7 +136,7 @@ struct CustomClass
 
 CustomClass c;
 MsgPack::Packer packer;
-packer.serialize(c); 
+packer.serialize(c);
 // -> packer.serialize(map_size_t(2), c.key_i, c.i, c.key_f, c.f)
 
 CustomClass cc;
@@ -471,7 +471,7 @@ I reccomend to use low cost but much better performance chip like ESP series.
 
 - [ArxTypeTraits v0.1.8](https://github.com/hideakitai/ArxTypeTraits)
 - [ArxContainer v0.3.6](https://github.com/hideakitai/ArxContainer)
-- [DebugLog v0.1.5](https://github.com/hideakitai/DebugLog)
+- [DebugLog v0.1.6](https://github.com/hideakitai/DebugLog)
 - [TeensyDirtySTLErrorSolution v0.1.0](https://github.com/hideakitai/TeensyDirtySTLErrorSolution)
 
 
