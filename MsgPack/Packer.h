@@ -23,6 +23,7 @@
 #endif // TEENSYDUINO
 
 #include "Types.h"
+#include "util/DebugLog/DebugLog.h"
 
 namespace ht {
 namespace serial {
