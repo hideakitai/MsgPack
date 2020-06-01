@@ -61,11 +61,89 @@ struct CustomClassDerived : public CustomClassBase
 
     bool operator== (const CustomClassDerived& x)
     {
-        return (x.i == i) && (x.f == f) && (x.s == s) && (x.ii == ii) && (x.ff == ff) && (x.ss == ss);
+        return CustomClassBase::operator==(x) && (x.ii == ii) && (x.ff == ff) && (x.ss == ss);
     }
 
     MSGPACK_DEFINE(ii, ff, ss, MSGPACK_BASE(CustomClassBase));
 };
+
+struct CustomClassBaseMap
+{
+    MsgPack::str_t ki;
+    int i;
+    MsgPack::str_t kf;
+    float f;
+    MsgPack::str_t ks;
+    MsgPack::str_t s;
+
+    bool operator== (const CustomClassBaseMap& x) const
+    {
+        return (x.i == i) && (x.f == f) && (x.s == s) && (x.ki == ki) && (x.kf == kf) && (x.ks == ks);
+    }
+
+    MSGPACK_DEFINE_MAP(ki, i, kf, f, ks, s);
+};
+
+struct CustomClassDerivedMap : public CustomClassBaseMap
+{
+    MsgPack::str_t kii;
+    int ii;
+    MsgPack::str_t kff;
+    float ff;
+    MsgPack::str_t kss;
+    MsgPack::str_t ss;
+    MsgPack::str_t kb;
+
+    bool operator== (const CustomClassDerivedMap& x)
+    {
+        return CustomClassBaseMap::operator==(x) && (x.ii == ii) && (x.ff == ff) && (x.ss == ss) && (x.kii == kii) && (x.kff == kff) && (x.kss == kss);
+    }
+
+    MSGPACK_DEFINE_MAP(kii, ii, kff, ff, kss, ss, kb, MSGPACK_BASE(CustomClassBaseMap));
+};
+
+
+
+// serialize and deserialize nested structure
+// {"i":i, "f":f, "a":["str", {"first":1, "second":"two"}]}
+
+struct MyMap
+{
+    MsgPack::str_t key_first; int i;
+    MsgPack::str_t key_second; MsgPack::str_t s;
+
+    bool operator==(const MyMap& x) { return (key_first == x.key_first) && (i == x.i) && (key_second == x.key_second) && (s == x.s); }
+    bool operator!=(const MyMap& x) { return !(*this == x); }
+
+    MSGPACK_DEFINE_MAP(key_first, i, key_second, s);
+};
+
+struct MyArr
+{
+    MsgPack::str_t s;
+    MyMap m;
+
+    bool operator==(const MyArr& x) { return (s == x.s) && (m == x.m); }
+    bool operator!=(const MyArr& x) { return !(*this == x); }
+
+    MSGPACK_DEFINE(s, m);
+};
+
+struct MyNestedClass
+{
+    MsgPack::str_t key_i; int i;
+    MsgPack::str_t key_f; int f;
+    MsgPack::str_t key_a;
+    MyArr arr;
+
+    bool operator==(const MyNestedClass& x) { return (key_i == x.key_i) && (i == x.i) && (key_f == x.key_f) && (f == x.f) && (key_a == x.key_a); }
+    bool operator!=(const MyNestedClass& x) { return !(*this == x); }
+
+    MSGPACK_DEFINE_MAP(key_i, i, key_f, f, key_a, arr);
+};
+
+
+
 
 int main ()
 {
@@ -1031,6 +1109,108 @@ int main ()
         assert(r_umm == umm);
     }
 
+    // serialize as array
+    {
+        int i = 123;
+        float f = 45.678;
+        MsgPack::str_t s = "9.9";
+
+        MsgPack::Packer packer;
+        packer.serialize(MsgPack::arr_size_t(3), i, f, s);
+
+        int ii;
+        float ff;
+        MsgPack::str_t ss;
+
+        MsgPack::Unpacker unpacker;
+        unpacker.feed(packer.data(), packer.size());
+        unpacker.deserialize(MsgPack::arr_size_t(3), ii, ff, ss);
+
+        assert(i == ii);
+        assert(f == ff);
+        assert(s == ss);
+    }
+    {
+        int i = 123;
+        float f = 45.678;
+        MsgPack::str_t s = "9.9";
+
+        MsgPack::Packer packer;
+        packer.to_array(i, f, s);
+
+        int ii;
+        float ff;
+        MsgPack::str_t ss;
+
+        MsgPack::Unpacker unpacker;
+        unpacker.feed(packer.data(), packer.size());
+        unpacker.from_array(ii, ff, ss);
+
+        assert(i == ii);
+        assert(f == ff);
+        assert(s == ss);
+    }
+
+    // serialize as map
+    {
+        MsgPack::str_t ki = "i";
+        int i = 123;
+        MsgPack::str_t kf = "f";
+        float f = 45.678;
+        MsgPack::str_t ks = "s";
+        MsgPack::str_t s = "9.9";
+
+        MsgPack::Packer packer;
+        packer.serialize(MsgPack::map_size_t(3), ki, i, kf, f, ks, s);
+
+        MsgPack::str_t kii;
+        int ii;
+        MsgPack::str_t kff;
+        float ff;
+        MsgPack::str_t kss;
+        MsgPack::str_t ss;
+
+        MsgPack::Unpacker unpacker;
+        unpacker.feed(packer.data(), packer.size());
+        unpacker.deserialize(MsgPack::map_size_t(3), kii, ii, kff, ff, kss, ss);
+
+        assert(ki == kii);
+        assert(i == ii);
+        assert(kf == kff);
+        assert(f == ff);
+        assert(ks == kss);
+        assert(s == ss);
+    }
+    {
+        MsgPack::str_t ki = "i";
+        int i = 123;
+        MsgPack::str_t kf = "f";
+        float f = 45.678;
+        MsgPack::str_t ks = "s";
+        MsgPack::str_t s = "9.9";
+
+        MsgPack::Packer packer;
+        packer.to_map(ki, i, kf, f, ks, s);
+
+        MsgPack::str_t kii;
+        int ii;
+        MsgPack::str_t kff;
+        float ff;
+        MsgPack::str_t kss;
+        MsgPack::str_t ss;
+
+        MsgPack::Unpacker unpacker;
+        unpacker.feed(packer.data(), packer.size());
+        unpacker.from_map(kii, ii, kff, ff, kss, ss);
+
+        assert(ki == kii);
+        assert(i == ii);
+        assert(kf == kff);
+        assert(f == ff);
+        assert(ks == kss);
+        assert(s == ss);
+    }
+
     // custom class
     {
         CustomClassBase a {1, 2.2, "3.3"};
@@ -1071,6 +1251,129 @@ int main ()
         assert(r_d == d);
         assert(r_e == e);
         assert(r_f == f);
+    }
+    {
+        CustomClassBaseMap a {"i", 1, "f", 2.2, "s", "3.3"};
+        CustomClassBaseMap b {"i", 4, "f", 5.5, "s", "6.6"};
+        CustomClassBaseMap c {"i", 7, "f", 8.8, "s", "9.9"};
+        CustomClassBaseMap r_a, r_b, r_c;
+
+        CustomClassDerivedMap d;// {1, 2.2, "3.3"};
+        CustomClassDerivedMap e;// {4, 5.5, "6.6"};
+        CustomClassDerivedMap f;// {7, 8.8, "9.9"};
+        CustomClassDerivedMap r_d, r_e, r_f;
+        d.kii = "ii"; d.kff = "ff"; d.kss = "ss";
+        d.kb = "base";
+        d.ii = 1; d.ff = 2.2; d.ss = "3.3";
+        d.ki = "i"; d.kf = "f"; d.ks = "s";
+        d.i = 4; d.f = 5.5; d.s = "6.6";
+        e.kii = "ii"; e.kff = "ff"; e.kss = "ss";
+        e.kb = "base";
+        e.ii = 4; e.ff = 5.5; e.ss = "6.6";
+        e.ki = "i"; e.kf = "f"; e.ks = "s";
+        e.i = 7; e.f = 8.8; e.s = "9.9";
+        f.kii = "ii"; f.kff = "ff"; f.kss = "ss";
+        f.kb = "base";
+        f.ii = 7; f.ff = 8.8; f.ss = "9.9";
+        f.ki = "i"; f.kf = "f"; f.ks = "s";
+        f.i = 1; f.f = 2.2; f.s = "3.3";
+
+        MsgPack::Packer packer;
+        packer.pack(a);
+        packer.pack(b);
+        packer.pack(c);
+        packer.pack(d);
+        packer.pack(e);
+        packer.pack(f);
+
+        MsgPack::Unpacker unpacker;
+        unpacker.feed(packer.data(), packer.size());
+
+        unpacker.deserialize(r_a, r_b, r_c);
+
+        assert(r_a == a);
+        assert(r_b == b);
+        assert(r_c == c);
+
+        unpacker.deserialize(r_d, r_e, r_f);
+
+        assert(r_d == d);
+        assert(r_e == e);
+        assert(r_f == f);
+    }
+
+    // nested
+    {
+        MsgPack::str_t ki {"i"}; int i {1};
+        MsgPack::str_t kf {"f"}; float f {2.2};
+        MsgPack::str_t ka {"a"};
+            MsgPack::str_t s {"str"};
+                MsgPack::str_t kmf {"first"}; int vmf {1};
+                MsgPack::str_t kms {"second"}; MsgPack::str_t vms {"two"};
+
+        MsgPack::Packer packer;
+        packer.serialize(MsgPack::map_size_t(3),
+            ki, i,
+            kf, f,
+            ka, MsgPack::arr_size_t(2),
+                s,
+                MsgPack::map_size_t(2),
+                    kmf, vmf,
+                    kms, vms
+        );
+
+        MsgPack::str_t kii; int ii;
+        MsgPack::str_t kff; float ff;
+        MsgPack::str_t kaa;
+            MsgPack::str_t ss;
+                MsgPack::str_t kmff; int vmff;
+                MsgPack::str_t kmss; MsgPack::str_t vmss;
+
+        MsgPack::Unpacker unpacker;
+        unpacker.feed(packer.data(), packer.size());
+        unpacker.deserialize(MsgPack::map_size_t(3),
+            kii, ii,
+            kff, ff,
+            kaa, MsgPack::arr_size_t(2),
+                ss,
+                MsgPack::map_size_t(2),
+                    kmff, vmff,
+                    kmss, vmss
+        );
+
+        assert(kii  == ki);
+        assert(ii   == i);
+        assert(kff  == kf);
+        assert(ff   == f);
+        assert(kaa  == ka);
+        assert(ss   == s);
+        assert(kmff == kmf);
+        assert(vmff == vmf);
+        assert(kmss == kms);
+        assert(vmss == vms);
+    }
+
+    // nested class
+    {
+        MyNestedClass c;
+        c.key_i = "i"; c.i = 1;
+        c.key_f = "f"; c.f = 2.2f;
+        c.key_a = "a";
+            c.arr.s = "str";
+                c.arr.m.key_first = "first";
+                c.arr.m.i = 1;
+                c.arr.m.key_second = "second";
+                c.arr.m.s = "two";
+
+        MsgPack::Packer packer;
+        packer.serialize(c);
+
+        MyNestedClass cc;
+        MsgPack::Unpacker unpacker;
+        unpacker.feed(packer.data(), packer.size());
+        unpacker.deserialize(cc);
+
+        assert(c == cc);
     }
 
     std::cout << "test success" << std::endl;
