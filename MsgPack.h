@@ -9,7 +9,7 @@
 #define HT_SERIAL_MSGPACK_DISABLE_STL
 #endif
 
-#ifndef MAGPACK_ENABLE_DEBUG_LOG
+#ifndef MSGPACK_ENABLE_DEBUG_LOG
 #define NDEBUG // disable conversion warning
 #endif
 
