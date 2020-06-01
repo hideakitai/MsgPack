@@ -61,7 +61,7 @@ C++ containers will be converted to one of them but you can do that from individ
 To `pack` / `unpack` values as such collections in a simple way, please use these functions.
 
 ```C++
-packer.to_array(i, f, s) // becoms array format [i, f, s];
+packer.to_array(i, f, s); // becoms array format [i, f, s];
 unpacker.from_array(ii, ff, ss); // unpack from array format to ii, ff, ss
 
 packer.to_map("i", i, "f", f); // becoms {"i":i, "f":f}
