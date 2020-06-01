@@ -17,7 +17,7 @@ struct MyArr
 {
     MsgPack::str_t s;
     MyMap m;
-    MSGPACK_DEFINE(s, m):
+    MSGPACK_DEFINE(s, m);
 
     bool operator==(const MyArr& x) { return (s == x.s) && (m == x.m); }
     bool operator!=(const MyArr& x) { return !(*this == x); }
@@ -31,7 +31,7 @@ struct MyNestedClass
     MyArr arr;
     MSGPACK_DEFINE_MAP(key_i, i, key_f, f, key_a, arr);
 
-    bool operator==(const MyNestedClass& x) { return (key_i == x.key_i) && (i == x.i) && (key_f = x.key_f) && (f == x.f) && (key_a == x.a); }
+    bool operator==(const MyNestedClass& x) { return (key_i == x.key_i) && (i == x.i) && (key_f == x.key_f) && (f == x.f) && (key_a == x.key_a); }
     bool operator!=(const MyNestedClass& x) { return !(*this == x); }
 };
 
