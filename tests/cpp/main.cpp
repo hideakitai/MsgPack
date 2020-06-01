@@ -12,6 +12,7 @@
 #include <unordered_map>
 #include <unordered_set>
 
+#define MSGPACK_ENABLE_DEBUG_LOG
 #include "../../MsgPack.h"
 
 const char str0[2] = "A";
