@@ -117,7 +117,7 @@ namespace msgpack {
             }
             else
             {
-                if      ((int64_t)value >  (int64_t)BitMask::INT5)                       packInt5(value);
+                if      ((int64_t)value >  -(int64_t)BitMask::INT5)                      packInt5(value);
                 else if ((int64_t)value >= (int64_t)std::numeric_limits<int8_t>::min())  packInt8(value);
                 else if ((int64_t)value >= (int64_t)std::numeric_limits<int16_t>::min()) packInt16(value);
                 else if ((int64_t)value >= (int64_t)std::numeric_limits<int32_t>::min()) packInt32(value);
