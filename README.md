@@ -259,6 +259,23 @@ unpacker.deserialize(r); // deserialize timestamp type
 
 ## Other Options
 
+### Enable Error Info
+
+Error information report is disabled by default. You can enable it by defining this macro.
+
+```C++
+#define MAGPACK_ENABLE_DEBUG_LOG
+```
+
+Also you can change debug info stream by calling this macro (default: `Serial`).
+
+```C++
+DEBUG_LOG_ATTACH_STREAM(Serial1);
+```
+
+See [DebugLog](https://github.com/hideakitai/DebugLog) for details.
+
+
 ### Packet Data Storage Class Inside
 
 STL is used to handle packet data by default, but for following boards/architectures, [ArxContainer](https://github.com/hideakitai/ArxContainer) is used to store the packet data because STL can not be used for such boards.
