@@ -179,7 +179,7 @@ struct Derived : public Base
 ```
 
 
-### Nested Custom Class Nest
+### Nested Custom Class
 
 You can nest custom classes to express complex data structure.
 
@@ -582,8 +582,18 @@ bool feed(const uint8_t* data, size_t size);
 
 template <typename First, typename ...Rest>
 void deserialize(First& first, Rest&&... rest);
+template <typename ...Args>
+void deserialize(const arr_size_t& arr_size, Args&&... args);
+template <typename ...Args>
+void deserialize(const map_size_t& map_size, Args&&... args);
+
+template <typename ...Args>
+void from_array(Args&&... args);
+template <typename ...Args>
+void from_map(Args&&... args);
+
 template <typename... Ts>
-void deserializeToTuple(std::tuple<Ts...>& t);
+void to_tuple(std::tuple<Ts...>& t);
 
 template <typename T>
 void unpack(T& value);
