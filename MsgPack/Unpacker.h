@@ -494,6 +494,19 @@ namespace msgpack {
         }
 
 
+        // ---------- Array/Map Size format ----------
+
+        void unpack(arr_size_t& t)
+        {
+            t = arr_size_t(unpackArraySize());
+        }
+
+        void unpack(map_size_t& t)
+        {
+            t = map_size_t(unpackMapSize());
+        }
+
+
         /////////////////////////////////////////
         // ---------- msgpack types ---------- //
         /////////////////////////////////////////
