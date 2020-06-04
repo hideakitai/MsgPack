@@ -1124,7 +1124,7 @@ int main ()
 
         MsgPack::Unpacker unpacker;
         unpacker.feed(packer.data(), packer.size());
-        unpacker.deserialize(MsgPack::arr_size_t(3), ii, ff, ss);
+        unpacker.from_array(ii, ff, ss);
 
         assert(i == ii);
         assert(f == ff);
@@ -1172,7 +1172,7 @@ int main ()
 
         MsgPack::Unpacker unpacker;
         unpacker.feed(packer.data(), packer.size());
-        unpacker.deserialize(MsgPack::map_size_t(3), kii, ii, kff, ff, kss, ss);
+        unpacker.from_map(kii, ii, kff, ff, kss, ss);
 
         assert(ki == kii);
         assert(i == ii);
@@ -1330,23 +1330,29 @@ int main ()
                 MsgPack::str_t kmss; MsgPack::str_t vmss;
 
         MsgPack::Unpacker unpacker;
+        MsgPack::map_size_t msz1;
+        MsgPack::arr_size_t asz1;
+        MsgPack::map_size_t msz2;
         unpacker.feed(packer.data(), packer.size());
-        unpacker.deserialize(MsgPack::map_size_t(3),
+        unpacker.deserialize(msz1,
             kii, ii,
             kff, ff,
-            kaa, MsgPack::arr_size_t(2),
+            kaa, asz1,
                 ss,
-                MsgPack::map_size_t(2),
+                msz2,
                     kmff, vmff,
                     kmss, vmss
         );
 
+        assert(msz1.size() == 3);
         assert(kii  == ki);
         assert(ii   == i);
         assert(kff  == kf);
         assert(ff   == f);
         assert(kaa  == ka);
+        assert(asz1.size() == 2);
         assert(ss   == s);
+        assert(msz2.size() == 2);
         assert(kmff == kmf);
         assert(vmff == vmf);
         assert(kmss == kms);
