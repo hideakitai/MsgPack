@@ -79,7 +79,7 @@ namespace msgpack {
             }
             else
             {
-                LOG_WARNING("serialize arg size not matched for map :", size);
+                LOG_WARNING("serialize arg size not matched for map :", sizeof...(args));
             }
         }
 
