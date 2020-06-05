@@ -1414,7 +1414,7 @@ private:
         {
             if (idx >= indices.size())
             {
-                LOG_WARNING("index overrun: idx", idx, " must be <" indices.size());
+                LOG_WARNING("index overrun: idx", idx, " must be <", indices.size());
                 return std::move(DataType());
             }
             DataType data;
@@ -1432,7 +1432,7 @@ private:
         {
             if (idx >= indices.size())
             {
-                LOG_WARNING("index overrun: idx", idx, " must be <" indices.size());
+                LOG_WARNING("index overrun: idx", idx, " must be <", indices.size());
                 return nullptr;
             }
             auto index = indices[idx] + offset;
@@ -1448,7 +1448,7 @@ private:
         {
             if (idx >= indices.size())
             {
-                LOG_WARNING("index overrun: idx", idx, " must be <" indices.size());
+                LOG_WARNING("index overrun: idx", idx, " must be <", indices.size());
                 return Type::NA;
             }
 
