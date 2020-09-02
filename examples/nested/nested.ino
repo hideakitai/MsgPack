@@ -30,23 +30,26 @@ void setup()
     );
 
 
-    MsgPack::str_t kii; int ii;
-    MsgPack::str_t kff; float ff;
-    MsgPack::str_t kaa;
-        MsgPack::str_t ss;
-            MsgPack::str_t kmff; int vmff;
-            MsgPack::str_t kmss; MsgPack::str_t vmss;
+    MsgPack::arr_size_t a3(3);
+        MsgPack::str_t kii; int ii;
+        MsgPack::str_t kff; float ff;
+        MsgPack::str_t kaa; MsgPack::arr_size_t va2(2);
+            MsgPack::str_t ss;
+            MsgPack::map_size_t m2(2);
+                MsgPack::str_t kmff; int vmff;
+                MsgPack::str_t kmss; MsgPack::str_t vmss;
 
     MsgPack::Unpacker unpacker;
     unpacker.feed(packer.data(), packer.size());
-    unpacker.deserialize(MsgPack::map_size_t(3),
-        kii, ii,
-        kff, ff,
-        kaa, MsgPack::arr_size_t(2),
-            ss,
-            MsgPack::map_size_t(2),
-                kmff, vmff,
-                kmss, vmss
+    unpacker.deserialize(
+        a3,
+            kii, ii,
+            kff, ff,
+            kaa, va2,
+                ss,
+                m2,
+                    kmff, vmff,
+                    kmss, vmss
     );
 
 
