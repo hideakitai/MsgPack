@@ -38,7 +38,13 @@ namespace msgpack {
 
         template <typename First, typename ...Rest>
         auto serialize(const First& first, Rest&&... rest)
-        -> typename std::enable_if<!std::is_pointer<First>::value>::type
+        -> typename std::enable_if<
+            !std::is_pointer<First>::value
+            || std::is_same<First, const char*>::value
+#ifdef ARDUINO
+            || std::is_same<First, const __FlashStringHelper*>::value
+#endif
+        >::type
         {
             pack(first);
             serialize(std::forward<Rest>(rest)...);
