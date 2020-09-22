@@ -9,6 +9,20 @@
     #include <string>
 #endif
 
+
+#ifdef INT5
+    // avoid conflict with interrrupt macro on e.g. Arduino Mega. This
+    // should not break code that rely on this constant, by keeping the
+    // value available as a C++-level constant. This first allocates a
+    // temporary constant, to capture the value before undeffing, and
+    // then defines the actual INT5 constant. Finally, INT5 is redefined
+    // as itself to make sure #ifdef INT5 still works.
+    static constexpr uint8_t INT5_TEMP_VALUE = INT5;
+    #undef INT5
+    static constexpr uint8_t INT5 = INT5_TEMP_VALUE;
+    #define INT5 INT5
+#endif
+
 #ifdef HT_SERIAL_MSGPACK_DISABLE_STL
     #include "util/ArxContainer/ArxContainer.h"
     #ifdef HT_SERIAL_MSGPACK_DISABLE_STL
