@@ -185,19 +185,27 @@ namespace msgpack {
 
         void pack(const char* str)
         {
-            str_t s(str);
-            pack(s);
+            const size_t len = strlen(str);
+            if (len <= (size_t)BitMask::STR5)
+                packString5(str);
+            else if (len <= std::numeric_limits<uint8_t>::max())
+                packString8(str);
+            else if (len <= std::numeric_limits<uint16_t>::max())
+                packString16(str);
+            else if (len <= std::numeric_limits<uint32_t>::max())
+                packString32(str);
         }
 
         void pack(const str_t& str)
         {
-            if (str.length() <= (size_t)BitMask::STR5)
+            const size_t len = str.length();
+            if (len <= (size_t)BitMask::STR5)
                 packString5(str);
-            else if (str.length() <= std::numeric_limits<uint8_t>::max())
+            else if (len <= std::numeric_limits<uint8_t>::max())
                 packString8(str);
-            else if (str.length() <= std::numeric_limits<uint16_t>::max())
+            else if (len <= std::numeric_limits<uint16_t>::max())
                 packString16(str);
-            else if (str.length() <= std::numeric_limits<uint32_t>::max())
+            else if (len <= std::numeric_limits<uint32_t>::max())
                 packString32(str);
         }
 
@@ -570,53 +578,68 @@ namespace msgpack {
 
         void packString5(const str_t& str)
         {
-            packRawByte((uint8_t)Type::STR5 | (str.length() & (uint8_t)BitMask::STR5));
-            packRawBytes(str.c_str(), str.length());
+            const size_t len = str.length();
+            packRawByte((uint8_t)Type::STR5 | ((uint8_t)len & (uint8_t)BitMask::STR5));
+            packRawBytes(str.c_str(), len);
             ++n_indices;
         }
         void packString5(const char* value)
         {
-            str_t str(value);
-            packString5(str);
+            const size_t len = strlen(value);
+            packRawByte((uint8_t)Type::STR5 | ((uint8_t)len & (uint8_t)BitMask::STR5));
+            packRawBytes(value, len);
+            ++n_indices;
         }
 
         void packString8(const str_t& str)
         {
+            const size_t len = str.length();
             packRawByte(Type::STR8);
-            packRawByte((uint8_t)str.length());
-            packRawBytes(str.c_str(), str.length());
+            packRawByte((uint8_t)len);
+            packRawBytes(str.c_str(), len);
             ++n_indices;
         }
         void packString8(const char* value)
         {
-            str_t str(value);
-            packString8(str);
+            const size_t len = strlen(value);
+            packRawByte(Type::STR8);
+            packRawByte((uint8_t)len);
+            packRawBytes(value, len);
+            ++n_indices;
         }
 
         void packString16(const str_t& str)
         {
+            const size_t len = str.length();
             packRawByte(Type::STR16);
-            packRawReversed((uint16_t)str.length());
-            packRawBytes(str.c_str(), str.length());
+            packRawReversed((uint16_t)len);
+            packRawBytes(str.c_str(), len);
             ++n_indices;
         }
         void packString16(const char* value)
         {
-            str_t str(value);
-            packString16(str);
+            const size_t len = strlen(value);
+            packRawByte(Type::STR16);
+            packRawReversed((uint16_t)len);
+            packRawBytes(value, len);
+            ++n_indices;
         }
 
         void packString32(const str_t& str)
         {
+            const size_t len = str.length();
             packRawByte(Type::STR32);
-            packRawReversed((uint32_t)str.length());
-            packRawBytes(str.c_str(), str.length());
+            packRawReversed((uint32_t)len);
+            packRawBytes(str.c_str(), len);
             ++n_indices;
         }
         void packString32(const char* value)
         {
-            str_t str(value);
-            packString32(str);
+            const size_t len = strlen(value);
+            packRawByte(Type::STR32);
+            packRawReversed((uint32_t)len);
+            packRawBytes(value, len);
+            ++n_indices;
         }
 
         // ---------- BIN format family ----------
