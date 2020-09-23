@@ -3,32 +3,42 @@
 #ifndef ARX_TYPE_TRAITS_TYPE_TRAITS_H
 #define ARX_TYPE_TRAITS_TYPE_TRAITS_H
 
-#ifdef ARX_TYPE_TRAITS_DISABLED
+#if ARX_HAVE_LIBSTDCPLUSPLUS >= 199711L // Have libstdc++98
 
-#ifdef max
-    #undef max
-    template <typename T1, typename T2>
-    constexpr auto max(T1 x, T2 y)
-    -> decltype(x + y)
-    {
-        return (x > y) ? x : y;
-    }
-#endif
-#ifdef min
-    #undef min
-    template <typename T1, typename T2>
-    constexpr auto min(T1 x, T2 y)
-    -> decltype(x + y)
-    {
-        return (x < y) ? x : y;
-    }
-#endif
+#include <utility>
 
-#include <stddef.h>
+#else // Do not have libstdc++98
+
+namespace arx { namespace arx_std {
+
+    template <class T>
+    void swap(T& a, T& b)
+    {
+        T t = move(a);
+        a = move(b);
+        b = move(t);
+    }
+} } // namespace arx::arx_std
+
+#endif // Do not have libstdc++98
+
+
+#if ARX_HAVE_LIBSTDCPLUSPLUS >= 201103L // Have libstdc++11
+
+#include <limits>
+#include <type_traits>
+#include <tuple>
+#include <functional>
+#include <utility>
+#include <initializer_list>
+
+#else // Do not have libstdc++11
+
 #include <float.h>
 #include <limits.h>
+#include <stdint.h>
 
-namespace std {
+namespace arx { namespace arx_std {
 
     using nullptr_t = decltype(nullptr);
 
@@ -266,11 +276,11 @@ namespace std {
 
     template<class From, class To>
     struct is_convertible
-    : std::conditional <
+    : conditional <
         can_apply <details::try_convert, From, To>::value
         , true_type
-        , typename std::conditional <
-            std::is_arithmetic<From>::value && std::is_arithmetic<To>::value,
+        , typename conditional <
+            is_arithmetic<From>::value && is_arithmetic<To>::value,
             true_type,
             false_type
         >::type
@@ -287,7 +297,7 @@ namespace std {
     // specialization for regular functions
     template<class Ret, class... Args>
     struct is_function<Ret(Args...)> : true_type {};
-    // specialization for variadic functions such as std::printf
+    // specialization for variadic functions such as printf
     template<class Ret, class... Args>
     struct is_function<Ret(Args......)> : true_type {};
     // specialization for function types that have cv-qualifiers
@@ -378,18 +388,17 @@ namespace std {
     using result_of = details::result_of<Sig>;
 
 
-    template <class T>
-    void swap(T& a, T& b)
-    {
-        T t = move(a);
-        a = move(b);
-        b = move(t);
-    }
+} } // namespace arx::arx_std
 
-
-#ifndef ARX_TYPE_TRAITS_INITIALIZER_LIST_DEFINED
+// Initializer_list *must* be defined in std, so take extra care to only
+// define it when <initializer_list> is really not available (e.g.
+// ArduinoSTL is C++98 but *does* define <initializer_list>) and not
+// already defined (e.g. by ArxContainer).
+#if __has_include(<initializer_list>)
+#include <initializer_list>
+#elif !defined(ARX_TYPE_TRAITS_INITIALIZER_LIST_DEFINED)
 #define ARX_TYPE_TRAITS_INITIALIZER_LIST_DEFINED
-
+namespace std {
     template<class T>
     class initializer_list
     {
@@ -403,38 +412,38 @@ namespace std {
         const T *begin() const { return array; }
         const T *end() const { return array + len; }
     };
-
-#endif // ARX_TYPE_TRAITS_INITIALIZER_LIST_DEFINED
-
 } // namespace std
+#endif // ARX_TYPE_TRAITS_INITIALIZER_LIST_DEFINED
 
 #include "tuple.h"
 #include "functional.h"
 
-#endif // ARX_TYPE_TRAITS_DISABLE_STL
+#endif // Do not have libstdc++11
 
 
-#if __cplusplus < 201402L // C++11
-#if !defined(OF_VERSION_MAJOR) || !defined(TARGET_WIN32)
+#if ARX_HAVE_LIBSTDCPLUSPLUS >= 201402L // Have libstdc++14
+    // Nothing to include here, relevant header files were already included
+    // for C++11  above.
+#else // Do not have libstdc++14
 
-namespace std {
+namespace arx { namespace arx_std {
 
     template <bool B, typename T = void>
-    using enable_if_t = typename std::enable_if<B, T>::type;
+    using enable_if_t = typename enable_if<B, T>::type;
 
     template <typename T>
-    using decay_t = typename std::decay<T>::type;
+    using decay_t = typename decay<T>::type;
 
     template<class T>
-    using remove_cv_t = typename std::remove_cv<T>::type;
+    using remove_cv_t = typename remove_cv<T>::type;
     template<class T>
-    using remove_const_t = typename std::remove_const<T>::type;
+    using remove_const_t = typename remove_const<T>::type;
     template<class T>
-    using remove_volatile_t = typename std::remove_volatile<T>::type;
+    using remove_volatile_t = typename remove_volatile<T>::type;
     template<class T>
-    using remove_reference_t = typename std::remove_reference<T>::type;
+    using remove_reference_t = typename remove_reference<T>::type;
     template<class T>
-    using remove_pointer_t = typename std::remove_pointer<T>::type;
+    using remove_pointer_t = typename remove_pointer<T>::type;
 
     template<typename T, T ...Ts>
     struct integer_sequence
@@ -471,17 +480,17 @@ namespace std {
     template<typename... Ts>
     using index_sequence_for = make_index_sequence<sizeof...(Ts)>;
 
-} // namespace std
+} } // namespace arx::arx_std
 
-#endif // !defined(OF_VERSION_MAJOR) || !defined(TARGET_WIN32)
-#endif // C++11
+#endif // Do not have libstdc++14
 
 
-#if __cplusplus < 201703L // C++14
+#if ARX_HAVE_LIBSTDCPLUSPLUS >= 201703L // Have libstdc++17
+    // Nothing to include here, relevant header files were already included
+    // for C++11  above.
+#else // Do not have libstdc++17
 
-namespace std {
-
-#if !defined(OF_VERSION_MAJOR) || !defined(TARGET_WIN32)
+namespace arx { namespace arx_std {
 
     template <class... Ts>
     struct Tester { using type = void; };
@@ -489,75 +498,77 @@ namespace std {
     using void_t = typename Tester<Ts...>::type;
 
     template <typename ...Args>
-    struct disjunction : std::false_type {};
+    struct disjunction : false_type {};
     template <typename Arg>
     struct disjunction <Arg> : Arg::type {};
     template <typename Arg, typename ...Args>
-    struct disjunction <Arg, Args...> : std::conditional<Arg::value, Arg, disjunction<Args...>>::type {};
+    struct disjunction <Arg, Args...> : conditional<Arg::value, Arg, disjunction<Args...>>::type {};
 
     template <typename ...Args>
-    struct conjunction : std::true_type {};
+    struct conjunction : true_type {};
     template <typename Arg>
     struct conjunction <Arg> : Arg::type {};
     template <typename Arg, typename ...Args>
-    struct conjunction <Arg, Args...> : std::conditional<Arg::value, conjunction<Args...>, Arg>::type {};
+    struct conjunction <Arg, Args...> : conditional<Arg::value, conjunction<Args...>, Arg>::type {};
 
     template <typename T>
-    struct negation : std::integral_constant<bool, !T::value> {};
-
-#endif // !defined(OF_VERSION_MAJOR) || !defined(TARGET_WIN32)
+    struct negation : integral_constant<bool, !T::value> {};
 
     // https://qiita.com/_EnumHack/items/92e6e135174f1f781dbb
     // without decltype(auto)
 
     template <class F, class Tuple, size_t... I>
     constexpr auto apply_impl(F&& f, Tuple&& t, index_sequence<I...>)
-    -> decltype(f(std::get<I>(std::forward<Tuple>(t))...))
+    -> decltype(f(get<I>(forward<Tuple>(t))...))
     {
-        return f(std::get<I>(std::forward<Tuple>(t))...);
+        return f(get<I>(forward<Tuple>(t))...);
     }
     template <class F, class Tuple>
     constexpr auto apply(F&& f, Tuple&& t)
     -> decltype(apply_impl(
-        std::forward<F>(f),
-        std::forward<Tuple>(t),
-        make_index_sequence<std::tuple_size<decay_t<Tuple>>::value>{}
+        forward<F>(f),
+        forward<Tuple>(t),
+        make_index_sequence<tuple_size<decay_t<Tuple>>::value>{}
     ))
     {
         return apply_impl(
-            std::forward<F>(f),
-            std::forward<Tuple>(t),
-            make_index_sequence<std::tuple_size<decay_t<Tuple>>::value>()
+            forward<F>(f),
+            forward<Tuple>(t),
+            make_index_sequence<tuple_size<decay_t<Tuple>>::value>()
         );
     }
 
-} // namespace std
+} } // namespace arx::arx_std
 
-#endif // C++14
+#endif // Do not have libstdc++17
 
 
-// C++17, C++2a
-namespace std {
+#if ARX_HAVE_LIBSTDCPLUSPLUS > 201703L // Have libstdc++2a
+    // Nothing to include here, relevant header files were already included
+    // for C++11  above.
+#else // Do not have libstdc++2a
+
+namespace arx { namespace arx_std {
 
     template<class T>
     struct remove_cvref
     {
-        typedef std::remove_cv_t<std::remove_reference_t<T>> type;
+        typedef remove_cv_t<remove_reference_t<T>> type;
     };
 
     template< class T >
     using remove_cvref_t = typename remove_cvref<T>::type;
 
-} // namespace std
-// C++17, C++2a
+} } // namespace arx::arx_std
+#endif // Do not have libstdc++2a
 
 
 namespace arx { // others
 
     template <class AlwaysVoid, template<class...> class Check, class... T>
-    struct is_detected_impl : std::false_type {};
+    struct is_detected_impl : arx_std::false_type {};
     template <template <class...> class Check, class... T>
-    struct is_detected_impl <std::void_t<Check<T...>>, Check, T...> : std::true_type {};
+    struct is_detected_impl <arx_std::void_t<Check<T...>>, Check, T...> : std::true_type {};
     template <template <class...> class Check, class... T>
     using is_detected = is_detected_impl<void, Check, T...>;
 
@@ -566,8 +577,8 @@ namespace arx { // others
     struct is_callable {
         template <typename U, decltype(&U::operator()) = &U::operator()>
         struct checker {};
-        template <typename U> static std::true_type  test(checker<U> *);
-        template <typename>   static std::false_type test(...);
+        template <typename U> static arx_std::true_type  test(checker<U> *);
+        template <typename>   static arx_std::false_type test(...);
         static constexpr bool value = decltype(test<T>(nullptr))::value;
     };
     template <typename R, typename ... Arguments>
@@ -587,7 +598,7 @@ namespace arx { // others
         static constexpr bool value = true;
     };
     template <typename R, typename ... Arguments>
-    struct is_callable<std::function<R(Arguments ...)>> {
+    struct is_callable<arx_std::function<R(Arguments ...)>> {
         static constexpr bool value = true;
     };
 
@@ -597,10 +608,10 @@ namespace arx { // others
         struct function_traits {
             static constexpr size_t arity = sizeof...(arguments);
             using result_type = ret;
-            using arguments_types_tuple = std::tuple<arguments ...>;
+            using arguments_types_tuple = arx_std::tuple<arguments ...>;
             // template <size_t index>
             // using argument_type = type_at<index, arguments ...>;
-            using function_type = std::function<ret(arguments ...)>;
+            using function_type = arx_std::function<ret(arguments ...)>;
             template <typename function_t>
             static constexpr function_type cast(function_t f) {
                 return static_cast<function_type>(f);
@@ -630,7 +641,7 @@ namespace arx { // others
     : detail::function_traits<ret, arguments ...> {};
 
     template <typename ret, typename ... arguments>
-    struct function_traits<std::function<ret(arguments ...)>>
+    struct function_traits<arx_std::function<ret(arguments ...)>>
     : detail::function_traits<ret, arguments ...> {};
 
 } // namespace arx
