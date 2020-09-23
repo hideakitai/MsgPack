@@ -677,7 +677,7 @@ namespace msgpack {
         void packString5(const __FlashStringHelper* str, const size_t len)
         {
             packRawByte((uint8_t)Type::STR5 | ((uint8_t)len & (uint8_t)BitMask::STR5));
-            packFlashString(str, len);
+            packFlashString(str);
             ++n_indices;
         }
 
@@ -688,7 +688,8 @@ namespace msgpack {
         void packString8(const __FlashStringHelper* str, const size_t len)
         {
             packRawByte(Type::STR8);
-            packFlashString(str, len);
+            packRawByte((uint8_t)len);
+            packFlashString(str);
             ++n_indices;
         }
 
@@ -699,7 +700,8 @@ namespace msgpack {
         void packString16(const __FlashStringHelper* str, const size_t len)
         {
             packRawByte(Type::STR16);
-            packFlashString(str, len);
+            packRawReversed((uint16_t)len);
+            packFlashString(str);
             ++n_indices;
         }
 
@@ -710,7 +712,8 @@ namespace msgpack {
         void packString32(const __FlashStringHelper* str, const size_t len)
         {
             packRawByte(Type::STR32);
-            packFlashString(str, len);
+            packRawReversed((uint32_t)len);
+            packFlashString(str);
             ++n_indices;
         }
 
@@ -1108,7 +1111,7 @@ namespace msgpack {
             return strlen_P((const char*)str);
         }
 
-        void packFlashString(const __FlashStringHelper* str, const size_t len)
+        void packFlashString(const __FlashStringHelper* str)
         {
             char* p = (char*)str;
             while (1)
