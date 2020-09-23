@@ -1384,22 +1384,28 @@ int main ()
 
     // string literal
     {
-        const char* c = "test3";
+        const char* c1 = "test3";
+        char c2[] = "abc";
         MsgPack::Packer packer;
         packer.serialize("test test test");
-        packer.serialize(c);
+        packer.serialize(c1);
+        packer.serialize(c2);
 
         MsgPack::str_t ss1;
         MsgPack::str_t ss2;
+        MsgPack::str_t ss3;
         MsgPack::Unpacker unpacker;
         unpacker.feed(packer.data(), packer.size());
         unpacker.deserialize(ss1);
         unpacker.deserialize(ss2);
+        unpacker.deserialize(ss3);
 
         MsgPack::str_t s1("test test test");
         MsgPack::str_t s2("test3");
+        MsgPack::str_t s3("abc");
         assert(s1 == ss1);
         assert(s2 == ss2);
+        assert(s3 == ss3);
     }
 
     std::cout << "test success" << std::endl;
