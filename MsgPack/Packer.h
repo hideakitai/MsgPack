@@ -215,6 +215,22 @@ namespace msgpack {
                 packString32(str, len);
         }
 
+#ifdef ARDUINO
+
+        void pack(const __FlashStringHelper* str)
+        {
+            const size_t len = getStringSize(str);
+            if (len <= (size_t)BitMask::STR5)
+                packString5(str, len);
+            else if (len <= std::numeric_limits<uint8_t>::max())
+                packString8(str, len);
+            else if (len <= std::numeric_limits<uint16_t>::max())
+                packString16(str, len);
+            else if (len <= std::numeric_limits<uint32_t>::max())
+                packString32(str, len);
+        }
+
+#endif
 
         // ---------- BIN format family ----------
         // - unsigned char*
@@ -661,6 +677,54 @@ namespace msgpack {
             ++n_indices;
         }
 
+#ifdef ARDUINO
+
+        void packString5(const __FlashStringHelper* str)
+        {
+            packString5(str, getStringSize(str));
+        }
+        void packString5(const __FlashStringHelper* str, const size_t len)
+        {
+            packRawByte((uint8_t)Type::STR5 | ((uint8_t)len & (uint8_t)BitMask::STR5));
+            packFlashString(str, len);
+            ++n_indices;
+        }
+
+        void packString8(const __FlashStringHelper* str)
+        {
+            packString8(str, getStringSize(str));
+        }
+        void packString8(const __FlashStringHelper* str, const size_t len)
+        {
+            packRawByte(Type::STR8);
+            packFlashString(str, len);
+            ++n_indices;
+        }
+
+        void packString16(const __FlashStringHelper* str)
+        {
+            packString16(str, getStringSize(str));
+        }
+        void packString16(const __FlashStringHelper* str, const size_t len)
+        {
+            packRawByte(Type::STR16);
+            packFlashString(str, len);
+            ++n_indices;
+        }
+
+        void packString32(const __FlashStringHelper* str)
+        {
+            packString32(str, getStringSize(str));
+        }
+        void packString32(const __FlashStringHelper* str, const size_t len)
+        {
+            packRawByte(Type::STR32);
+            packFlashString(str, len);
+            ++n_indices;
+        }
+
+#endif
+
         // ---------- BIN format family ----------
 
         void packBinary8(const uint8_t* value, const uint8_t size)
@@ -1046,6 +1110,25 @@ namespace msgpack {
             return strlen(str);
         }
 
+#ifdef ARDUINO
+
+        size_t getStringSize(const __FlashStringHelper* str) const
+        {
+            return strlen_P((const char*)str);
+        }
+
+        void packFlashString(const __FlashStringHelper* str, const size_t len)
+        {
+            char* p = (char*)str;
+            while (1)
+            {
+                uint8_t c = pgm_read_byte(p++);
+                if (c == 0) break;
+                packRawByte(c);
+            }
+        }
+
+#endif
     };
 
 } // namespace msgpack
