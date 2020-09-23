@@ -189,47 +189,19 @@ namespace msgpack {
         // - char[]
         // - std::string
 
-        void pack(const char* str)
-        {
-            const size_t len = getStringSize(str);
-            if (len <= (size_t)BitMask::STR5)
-                packString5(str, len);
-            else if (len <= std::numeric_limits<uint8_t>::max())
-                packString8(str, len);
-            else if (len <= std::numeric_limits<uint16_t>::max())
-                packString16(str, len);
-            else if (len <= std::numeric_limits<uint32_t>::max())
-                packString32(str, len);
-        }
-
         void pack(const str_t& str)
         {
-            const size_t len = getStringSize(str);
-            if (len <= (size_t)BitMask::STR5)
-                packString5(str, len);
-            else if (len <= std::numeric_limits<uint8_t>::max())
-                packString8(str, len);
-            else if (len <= std::numeric_limits<uint16_t>::max())
-                packString16(str, len);
-            else if (len <= std::numeric_limits<uint32_t>::max())
-                packString32(str, len);
+            packString(str, getStringSize(str));
         }
-
+        void pack(const char* str)
+        {
+            packString(str, getStringSize(str));
+        }
 #ifdef ARDUINO
-
         void pack(const __FlashStringHelper* str)
         {
-            const size_t len = getStringSize(str);
-            if (len <= (size_t)BitMask::STR5)
-                packString5(str, len);
-            else if (len <= std::numeric_limits<uint8_t>::max())
-                packString8(str, len);
-            else if (len <= std::numeric_limits<uint16_t>::max())
-                packString16(str, len);
-            else if (len <= std::numeric_limits<uint32_t>::max())
-                packString32(str, len);
+            packString(str, getStringSize(str));
         }
-
 #endif
 
         // ---------- BIN format family ----------
@@ -597,6 +569,25 @@ namespace msgpack {
 
 
         // ---------- STR format family ----------
+
+        template <typename T>
+        void packString(const T& str)
+        {
+            packString(str, getStringSize(str));
+        }
+
+        template <typename T>
+        void packString(const T& str, const size_t len)
+        {
+            if (len <= (size_t)BitMask::STR5)
+                packString5(str, len);
+            else if (len <= std::numeric_limits<uint8_t>::max())
+                packString8(str, len);
+            else if (len <= std::numeric_limits<uint16_t>::max())
+                packString16(str, len);
+            else if (len <= std::numeric_limits<uint32_t>::max())
+                packString32(str, len);
+        }
 
         void packString5(const str_t& str)
         {
