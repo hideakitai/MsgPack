@@ -27,7 +27,13 @@
 #define ARX_MAP_DEFAULT_SIZE 16
 #endif // ARX_MAP_DEFAULT_SIZE
 
-#ifndef ARX_TYPE_TRAITS_INITIALIZER_LIST_DEFINED
+// Initializer_list *must* be defined in std, so take extra care to only
+// define it when <initializer_list> is really not available (e.g.
+// ArduinoSTL is C++98 but *does* define <initializer_list>) and not
+// already defined (e.g. by ArxContainer).
+#if __has_include(<initializer_list>)
+#include <initializer_list>
+#elif !(defined(ARX_TYPE_TRAITS_INITIALIZER_LIST_DEFINED))
 #define ARX_TYPE_TRAITS_INITIALIZER_LIST_DEFINED
 namespace std
 {
