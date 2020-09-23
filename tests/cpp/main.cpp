@@ -1382,5 +1382,25 @@ int main ()
         assert(c == cc);
     }
 
+    // string literal
+    {
+        const char* c = "test3";
+        MsgPack::Packer packer;
+        packer.serialize("test test test");
+        packer.serialize(c);
+
+        MsgPack::str_t ss1;
+        MsgPack::str_t ss2;
+        MsgPack::Unpacker unpacker;
+        unpacker.feed(packer.data(), packer.size());
+        unpacker.deserialize(ss1);
+        unpacker.deserialize(ss2);
+
+        MsgPack::str_t s1("test test test");
+        MsgPack::str_t s2("test3");
+        assert(s1 == ss1);
+        assert(s2 == ss2);
+    }
+
     std::cout << "test success" << std::endl;
 }
