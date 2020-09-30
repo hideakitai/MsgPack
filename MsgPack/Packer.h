@@ -191,6 +191,10 @@ namespace msgpack {
         {
             packString(str, getStringSize(str));
         }
+        void pack(const char* str, const size_t size)
+        {
+            packString(str, size);
+        }
 #ifdef ARDUINO
         void pack(const __FlashStringHelper* str)
         {
