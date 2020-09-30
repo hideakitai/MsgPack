@@ -50,12 +50,6 @@ namespace msgpack {
             serialize(std::forward<Rest>(rest)...);
         }
 
-        template <typename T>
-        void serialize(const T* data, const size_t size)
-        {
-            pack(data, size);
-        }
-
         void serialize()
         {
         }
