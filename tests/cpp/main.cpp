@@ -359,10 +359,20 @@ int main ()
         packer.pack(MsgPack::str_t(str16));
         // packer.pack(str32); // TODO:
 
+        // ptr, size
+        packer.pack(str0, strlen(str0));
+        packer.pack(str5, strlen(str5));
+        packer.pack(str8, strlen(str8));
+        packer.pack(str16, strlen(str16));
+
 
         MsgPack::Unpacker unpacker;
         unpacker.feed(packer.data(), packer.size());
 
+        assert(unpacker.unpackString5() == MsgPack::str_t(str0));
+        assert(unpacker.unpackString5() == MsgPack::str_t(str5));
+        assert(unpacker.unpackString8() == MsgPack::str_t(str8));
+        assert(unpacker.unpackString16() == MsgPack::str_t(str16));
         assert(unpacker.unpackString5() == MsgPack::str_t(str0));
         assert(unpacker.unpackString5() == MsgPack::str_t(str5));
         assert(unpacker.unpackString8() == MsgPack::str_t(str8));

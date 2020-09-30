@@ -255,25 +255,37 @@ void setup()
         packer.serialize(c2);
         packer.serialize(F("flash"));
 
+        // ptr, size
+        packer.pack(c1, strlen(c1));
+        packer.pack(c2, strlen(c2));
+
         MsgPack::str_t ss1;
         MsgPack::str_t ss2;
         MsgPack::str_t ss3;
         MsgPack::str_t ss4;
+        MsgPack::str_t ss5;
+        MsgPack::str_t ss6;
         MsgPack::Unpacker unpacker;
         unpacker.feed(packer.data(), packer.size());
         unpacker.deserialize(ss1);
         unpacker.deserialize(ss2);
         unpacker.deserialize(ss3);
         unpacker.deserialize(ss4);
+        unpacker.deserialize(ss5);
+        unpacker.deserialize(ss6);
 
         MsgPack::str_t s1("test test test");
         MsgPack::str_t s2("test3");
         MsgPack::str_t s3("abc");
         MsgPack::str_t s4("flash");
+        MsgPack::str_t s5("test3");
+        MsgPack::str_t s6("abc");
         assert(s1 == ss1);
         assert(s2 == ss2);
         assert(s3 == ss3);
         assert(s4 == ss4);
+        assert(s5 == ss5);
+        assert(s6 == ss6);
     }
 
 
