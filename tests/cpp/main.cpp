@@ -359,10 +359,20 @@ int main ()
         packer.pack(MsgPack::str_t(str16));
         // packer.pack(str32); // TODO:
 
+        // ptr, size
+        packer.pack(str0, strlen(str0));
+        packer.pack(str5, strlen(str5));
+        packer.pack(str8, strlen(str8));
+        packer.pack(str16, strlen(str16));
+
 
         MsgPack::Unpacker unpacker;
         unpacker.feed(packer.data(), packer.size());
 
+        assert(unpacker.unpackString5() == MsgPack::str_t(str0));
+        assert(unpacker.unpackString5() == MsgPack::str_t(str5));
+        assert(unpacker.unpackString8() == MsgPack::str_t(str8));
+        assert(unpacker.unpackString16() == MsgPack::str_t(str16));
         assert(unpacker.unpackString5() == MsgPack::str_t(str0));
         assert(unpacker.unpackString5() == MsgPack::str_t(str5));
         assert(unpacker.unpackString8() == MsgPack::str_t(str8));
@@ -1380,6 +1390,32 @@ int main ()
         unpacker.deserialize(cc);
 
         assert(c == cc);
+    }
+
+    // string literal
+    {
+        const char* c1 = "test3";
+        char c2[] = "abc";
+        MsgPack::Packer packer;
+        packer.serialize("test test test");
+        packer.serialize(c1);
+        packer.serialize(c2);
+
+        MsgPack::str_t ss1;
+        MsgPack::str_t ss2;
+        MsgPack::str_t ss3;
+        MsgPack::Unpacker unpacker;
+        unpacker.feed(packer.data(), packer.size());
+        unpacker.deserialize(ss1);
+        unpacker.deserialize(ss2);
+        unpacker.deserialize(ss3);
+
+        MsgPack::str_t s1("test test test");
+        MsgPack::str_t s2("test3");
+        MsgPack::str_t s3("abc");
+        assert(s1 == ss1);
+        assert(s2 == ss2);
+        assert(s3 == ss3);
     }
 
     std::cout << "test success" << std::endl;
