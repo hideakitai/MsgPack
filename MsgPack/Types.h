@@ -79,6 +79,9 @@ namespace msgpack {
     using str_t = String;
 #else
     using str_t = std::string;
+    #ifndef F
+    inline const char* F(const char* c) { return c; }
+    #endif
 #endif
 
     namespace type
