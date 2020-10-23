@@ -605,35 +605,50 @@ void packTimestamp96(const int64_t unix_time_sec, const uint32_t unix_time_nsec)
 ### MsgPack::Unpacker
 
 ``` C++
+// feed data to deserialize
 bool feed(const uint8_t* data, size_t size);
 
+// variable sized deserializer
 template <typename First, typename ...Rest>
 void deserialize(First& first, Rest&&... rest);
-template <typename ...Args>
-void deserialize(const arr_size_t& arr_size, Args&&... args);
-template <typename ...Args>
-void deserialize(const map_size_t& map_size, Args&&... args);
 
+// varibale sized desrializer for array and map
 template <typename ...Args>
 void from_array(Args&&... args);
 template <typename ...Args>
 void from_map(Args&&... args);
 
-template <typename... Ts>
-void to_tuple(std::tuple<Ts...>& t);
-
+// single arg deserializer
 template <typename T>
 void unpack(T& value);
 
+// check if next arg can be deserialized to value
 template <typename T>
 bool unpackable(const T& value) const;
 
+// accesor and utility for deserialized msgpack data
 bool available() const;
 size_t size() const;
 void index(const size_t i);
 size_t index() const;
 void clear();
 
+// abstract deserializer for msgpack formats
+// deserialize() and unpack() are wrapper for these methods
+T unpackUInt();
+T unpackInt();
+T unpackFloat();
+str_t unpackString();
+bin_t<T> unpackBinary();
+bin_t<T> unpackBinary();
+size_t unpackArraySize();
+size_t unpackMapSize();
+object::ext unpackExt();
+object::timespec unpackTimestamp();
+
+// deserializer for detailed msgpack format
+// these methods check deserialize index overflow and type mismatch
+// deserialize() and unpack() are wrapper for these methods
 bool unpackNil();
 bool unpackBool();
 uint8_t unpackUInt7();
@@ -652,27 +667,75 @@ str_t unpackString5();
 str_t unpackString8();
 str_t unpackString16();
 str_t unpackString32();
-template <typename T = uint8_t>
-bin_t<T> unpackBinary();
-template <typename T = uint8_t>
 bin_t<T> unpackBinary8();
-template <typename T = uint8_t>
 bin_t<T> unpackBinary16();
-template <typename T = uint8_t>
 bin_t<T> unpackBinary32();
-template <typename T, size_t N>
-std::array<T, N> unpackBinary();
-template <typename T, size_t N>
 std::array<T, N> unpackBinary8();
-template <typename T, size_t N>
 std::array<T, N> unpackBinary16();
-template <typename T, size_t N>
 std::array<T, N> unpackBinary32();
-size_t unpackArraySize();
-size_t unpackMapSize();
-object::ext unpackExt();
-object::timespec unpackTimestamp();
+size_t unpackArraySize4();
+size_t unpackArraySize16();
+size_t unpackArraySize32();
+size_t unpackMapSize4();
+size_t unpackMapSize16();
+size_t unpackMapSize32();
+object::ext unpackFixExt1();
+object::ext unpackFixExt2();
+object::ext unpackFixExt4();
+object::ext unpackFixExt8();
+object::ext unpackFixExt16();
+object::ext unpackExt8();
+object::ext unpackExt16();
+object::ext unpackExt32();
+object::timespec unpackTimestamp32();
+object::timespec unpackTimestamp64();
+object::timespec unpackTimestamp96();
 
+// deserializer for detailed msgpack format
+// these methods does NOT check index overflow and type mismatch
+bool unpackNilUnchecked();
+bool unpackBoolUnchecked();
+uint8_t unpackUIntUnchecked7();
+uint8_t unpackUIntUnchecked8();
+uint16_t unpackUIntUnchecked16();
+uint32_t unpackUIntUnchecked32();
+uint64_t unpackUIntUnchecked64();
+int8_t unpackIntUnchecked5();
+int8_t unpackIntUnchecked8();
+int16_t unpackIntUnchecked16();
+int32_t unpackIntUnchecked32();
+int64_t unpackIntUnchecked64();
+float unpackFloatUnchecked32();
+double unpackFloatUnchecked64();
+str_t unpackStringUnchecked5();
+str_t unpackStringUnchecked8();
+str_t unpackStringUnchecked16();
+str_t unpackStringUnchecked32();
+bin_t<T> unpackBinaryUnchecked8();
+bin_t<T> unpackBinaryUnchecked16();
+bin_t<T> unpackBinaryUnchecked32();
+std::array<T, N> unpackBinaryUnchecked8();
+std::array<T, N> unpackBinaryUnchecked16();
+std::array<T, N> unpackBinaryUnchecked32();
+size_t unpackArraySizeUnchecked4();
+size_t unpackArraySizeUnchecked16();
+size_t unpackArraySizeUnchecked32();
+size_t unpackMapSizeUnchecked4();
+size_t unpackMapSizeUnchecked16();
+size_t unpackMapSizeUnchecked32();
+object::ext unpackFixExtUnchecked1();
+object::ext unpackFixExtUnchecked2();
+object::ext unpackFixExtUnchecked4();
+object::ext unpackFixExtUnchecked8();
+object::ext unpackFixExtUnchecked16();
+object::ext unpackExtUnchecked8();
+object::ext unpackExtUnchecked16();
+object::ext unpackExtUnchecked32();
+object::timespec unpackTimestampUnchecked32();
+object::timespec unpackTimestampUnchecked64();
+object::timespec unpackTimestampUnchecked96();
+
+// checks types of next msgpack object
 bool isNil() const;
 bool isBool() const;
 bool isUInt7() const;
@@ -721,6 +784,61 @@ bool isTimestamp32() const;
 bool isTimestamp64() const;
 bool isTimestamp96() const;
 bool isTimestamp() const;
+MsgPack::Type getType() const
+```
+
+
+### MsgPack::Type
+
+``` C++
+enum class Type : uint8_t
+{
+    NA          = 0xC1, // never used
+    NIL         = 0xC0,
+    BOOL        = 0xC2,
+    UINT7       = 0x00, // same as POSITIVE_FIXINT
+    UINT8       = 0xCC,
+    UINT16      = 0xCD,
+    UINT32      = 0xCE,
+    UINT64      = 0xCF,
+    INT5        = 0xE0, // same as NEGATIVE_FIXINT
+    INT8        = 0xD0,
+    INT16       = 0xD1,
+    INT32       = 0xD2,
+    INT64       = 0xD3,
+    FLOAT32     = 0xCA,
+    FLOAT64     = 0xCB,
+    STR5        = 0xA0, // same as FIXSTR
+    STR8        = 0xD9,
+    STR16       = 0xDA,
+    STR32       = 0xDB,
+    BIN8        = 0xC4,
+    BIN16       = 0xC5,
+    BIN32       = 0xC6,
+    ARRAY4      = 0x90, // same as FIXARRAY
+    ARRAY16     = 0xDC,
+    ARRAY32     = 0xDD,
+    MAP4        = 0x80, // same as FIXMAP
+    MAP16       = 0xDE,
+    MAP32       = 0xDF,
+    FIXEXT1     = 0xD4,
+    FIXEXT2     = 0xD5,
+    FIXEXT4     = 0xD6,
+    FIXEXT8     = 0xD7,
+    FIXEXT16    = 0xD8,
+    EXT8        = 0xC7,
+    EXT16       = 0xC8,
+    EXT32       = 0xC9,
+    TIMESTAMP32 = 0xD6,
+    TIMESTAMP64 = 0xD7,
+    TIMESTAMP96 = 0xC7,
+
+    POSITIVE_FIXINT = 0x00,
+    NEGATIVE_FIXINT = 0xE0,
+    FIXSTR          = 0xA0,
+    FIXARRAY        = 0x90,
+    FIXMAP          = 0x80,
+};
 ```
 
 ## Reference
