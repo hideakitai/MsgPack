@@ -73,9 +73,7 @@ namespace msgpack {
                 deserialize(sz, std::forward<Args>(args)...);
             }
             else
-            {
-                LOG_WARNING("serialize arg size not matched for map :", sizeof...(args));
-            }
+                LOG_ERROR(F("arg size must be even for map:"), sizeof...(args));
         }
 
         template <typename... Ts>
@@ -383,13 +381,9 @@ namespace msgpack {
         {
             const size_t size = unpackArraySize();
             if (N == size)
-            {
                 for (auto& a : arr) unpack(a);
-            }
             else
-            {
-                LOG_WARNING("unpack array size is not matched :", size, "must be", N);
-            }
+                LOG_ERROR(F("array size mismatch:"), size, F("must be"), N);
         }
 
         template <typename T>
@@ -403,15 +397,11 @@ namespace msgpack {
         void unpack(std::pair<T, U>& arr)
         {
             const size_t size = unpackArraySize();
-            if (size == 1)
-            {
+            if (size == 1) {
                 unpack(arr.first);
                 unpack(arr.second);
-            }
-            else
-            {
-                LOG_WARNING("unpack array size is not matched :", size, "must be", 1);
-            }
+            } else
+                LOG_ERROR(F("array size mismatch:"), size, F("must be"), 1);
         }
 
         template <typename... Args>
@@ -419,13 +409,9 @@ namespace msgpack {
         {
             const size_t size = unpackArraySize();
             if (sizeof...(Args) == size)
-            {
                 to_tuple(t);
-            }
             else
-            {
-                LOG_WARNING("unpack array size is not matched :", size, "must be", sizeof...(Args));
-            }
+                LOG_ERROR(F("array size mismatch:"), size, F("must be"), sizeof...(Args));
         }
 
         template <typename T>
@@ -439,14 +425,10 @@ namespace msgpack {
         {
             const size_t arr_size = std::distance(arr.begin(), arr.end());
             const size_t size = unpackArraySize();
-            if (arr_size == size)
-            {
+            if (size == 0)
+                LOG_ERROR(F("array size mismatch:"), size, F("must be"), arr_size);
+            else if (arr_size == size)
                 for (auto& a : arr) unpack(a);
-            }
-            else if (size == 0)
-            {
-                LOG_WARNING("unpack array size is not matched :", size, "must be", arr_size);
-            }
             else
             {
                 arr.clear();
@@ -1409,7 +1391,7 @@ private:
         {
             if (idx >= indices.size())
             {
-                LOG_WARNING("index overrun: idx", idx, " must be <", indices.size());
+                LOG_ERROR(F("index overrun: idx"), idx, F("must be <"), indices.size());
                 return DataType();
             }
             DataType data;
@@ -1427,7 +1409,7 @@ private:
         {
             if (idx >= indices.size())
             {
-                LOG_WARNING("index overrun: idx", idx, " must be <", indices.size());
+                LOG_ERROR(F("index overrun: idx"), idx, F("must be <"), indices.size());
                 return nullptr;
             }
             auto index = indices[idx] + offset;
@@ -1443,7 +1425,7 @@ private:
         {
             if (idx >= indices.size())
             {
-                LOG_WARNING("index overrun: idx", idx, " must be <", indices.size());
+                LOG_ERROR(F("index overrun: idx"), idx, F("must be <"), indices.size());
                 return Type::NA;
             }
 
@@ -1518,6 +1500,7 @@ private:
                 case Type::EXT32:
                     return (size_t)getRawBytes<uint32_t>(i, 1) + sizeof(uint32_t) + 1 + 1;
                 default:
+                    LOG_ERROR(F("undefined type:"), (int)type);
                     return 0;
             }
         }
@@ -1531,17 +1514,10 @@ private:
 #endif // Do not have libstdc++11
         {
             const size_t size = unpackArraySize();
-            if (arr.size() == size)
-            {
-                for (auto& a : arr)
-                {
-                    unpack(a);
-                }
-            }
-            else if (size == 0)
-            {
-                LOG_WARNING("unpack array size is not matched :", size, "must be", arr.size());
-            }
+            if (size == 0)
+                LOG_ERROR(F("array size mismatch:"), size, F("must be"), arr.size());
+            else if (arr.size() == size)
+                for (auto& a : arr) unpack(a);
             else
             {
                 arr.clear();
@@ -1563,9 +1539,7 @@ private:
         {
             const size_t size = unpackArraySize();
             if (size == 0)
-            {
-                LOG_WARNING("unpack array size is not matched :", size, "must be", arr.size());
-            }
+                LOG_ERROR(F("array size mismatch:"), size, F("must be"), arr.size());
             else
             {
                 arr.clear();
@@ -1580,17 +1554,16 @@ private:
 
 #if ARX_HAVE_LIBSTDCPLUSPLUS >= 201103L // Have libstdc++11
         template <template <typename...> class C, class T, class U>
-        void unpackMapContainer(C<T, U>& mp)
+        void unpackMapContainer(C<T, U>& mp) {
+            using namespace std;
 #else // Do not have libstdc++11
         template <typename T, typename U>
-        void unpackMapContainer(map_t<T, U>& mp)
+        void unpackMapContainer(map_t<T, U>& mp) {
+            using namespace arx;
 #endif // Do not have libstdc++11
-        {
             const size_t size = unpackMapSize();
             if (size == 0)
-            {
-                LOG_WARNING("unpack map size is not matched :", size, "must be", mp.size());
-            }
+                LOG_ERROR(F("map size mismatch:"), size, F("must be"), mp.size());
             else
             {
                 mp.clear();
@@ -1599,11 +1572,7 @@ private:
                     T t; U u;
                     unpack(t);
                     unpack(u);
-#if ARX_HAVE_LIBSTDCPLUSPLUS >= 201103L // Have libstdc++11
-                    mp.emplace(std::make_pair(t, u));
-#else
-                    mp.emplace(arx::make_pair(t, u));
-#endif
+                    mp.emplace(make_pair(t, u));
                 }
             }
         }
