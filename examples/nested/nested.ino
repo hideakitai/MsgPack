@@ -19,18 +19,19 @@ void setup()
             MsgPack::str_t kms {"second"}; MsgPack::str_t vms {"two"};
 
     MsgPack::Packer packer;
-    packer.serialize(MsgPack::map_size_t(3),
-        ki, i,
-        kf, f,
-        ka, MsgPack::arr_size_t(2),
-            s,
-            MsgPack::map_size_t(2),
-                kmf, vmf,
-                kms, vms
+    packer.serialize(
+        MsgPack::map_size_t(3),
+            ki, i,
+            kf, f,
+            ka, MsgPack::arr_size_t(2),
+                s,
+                MsgPack::map_size_t(2),
+                    kmf, vmf,
+                    kms, vms
     );
 
 
-    MsgPack::arr_size_t a3(3);
+    MsgPack::map_size_t m3(3);
         MsgPack::str_t kii; int ii;
         MsgPack::str_t kff; float ff;
         MsgPack::str_t kaa; MsgPack::arr_size_t va2(2);
@@ -42,7 +43,7 @@ void setup()
     MsgPack::Unpacker unpacker;
     unpacker.feed(packer.data(), packer.size());
     unpacker.deserialize(
-        a3,
+        m3,
             kii, ii,
             kff, ff,
             kaa, va2,
