@@ -1,3 +1,4 @@
+#define MSGPACK_ENABLE_DEBUG_LOG
 #include <Arduino.h>
 #include <MsgPack.h>
 
@@ -119,19 +120,19 @@ void setup()
 
 
         // Bool
-        bool r_b1;
-        bool r_b2;
+        bool r_b1 {false};
+        bool r_b2 {false};
         // Integer
-        char r_i5;
-        unsigned char r_u7;
-        int8_t r_i8;
-        int16_t r_i16;
-        int32_t r_i32;
-        int64_t r_i64;
-        uint8_t r_u8;
-        uint16_t r_u16;
-        uint32_t r_u32;
-        uint64_t r_u64;
+        char r_i5 {0};
+        unsigned char r_u7 {0};
+        int8_t r_i8 {0};
+        int16_t r_i16 {0};
+        int32_t r_i32 {0};
+        int64_t r_i64 {0};
+        uint8_t r_u8 {0};
+        uint16_t r_u16 {0};
+        uint32_t r_u32 {0};
+        uint64_t r_u64 {0};
         // Float
         float r_f;
         double r_d;
