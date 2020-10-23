@@ -69,7 +69,7 @@ namespace msgpack {
         {
             if ((sizeof...(args) % 2) == 0)
             {
-                static arr_size_t sz;
+                static map_size_t sz;
                 deserialize(sz, std::forward<Args>(args)...);
             }
             else
