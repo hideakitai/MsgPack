@@ -1380,7 +1380,7 @@ namespace msgpack {
         bool isExt() const { return isExt8() || isExt16() || isExt32(); }
         bool isTimestamp32() const { return (getType() == Type::TIMESTAMP32) && (getRawBytes<int8_t>(curr_index, 1) == -1); }
         bool isTimestamp64() const { return (getType() == Type::TIMESTAMP64) && (getRawBytes<int8_t>(curr_index, 1) == -1); }
-        bool isTimestamp96() const { return (getType() == Type::TIMESTAMP96) && (getRawBytes<int8_t>(curr_index, 2) == -1); }
+        bool isTimestamp96() const { return (getType() == Type::TIMESTAMP96) && (getRawBytes<int8_t>(curr_index, 2) == -1) && (getRawBytes<uint8_t>(curr_index, 1) == 12); }
         bool isTimestamp() const { return isTimestamp32() || isTimestamp64() || isTimestamp96(); }
 
 
