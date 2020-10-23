@@ -484,29 +484,54 @@ I reccomend to use low cost but much better performance chip like ESP series.
 ### MsgPack::Packer
 
 ``` C++
+// variable sized serializer for any type
 template <typename First, typename ...Rest>
 void serialize(const First& first, Rest&&... rest);
 template <typename T>
-void serialize(const T* data, const size_t size); // only for poitner types
-    template <typename ...Args>
 void serialize(const arr_size_t& arr_size, Args&&... args);
 template <typename ...Args>
 void serialize(const map_size_t& map_size, Args&&... args);
 
+// variable sized serializer to array or map for any type
 template <typename ...Args>
 void to_array(Args&&... args);
 template <typename ...Args>
 void to_map(Args&&... args);
 
+// single arg packer for any type
+template <typename T>
 void pack<T>(const T& t);
+template <typename T>
 void pack<T>(const T* ptr, const size_t size); // only for pointer types
 
+// accesor and utility for serialized binary data
 const bin_t<uint8_t>& packet() const;
 const uint8_t* data() const;
 size_t size() const;
 size_t indices() const;
 void clear();
 
+// abstract serializer for msgpack formats
+// serialize() and pack() are wrapper for these methods
+void packInteger(const T& value); // accept both uint and int
+void packFloat(const T& value);
+void packString(const T& str);
+void packString(const T& str, const size_t len);
+void packBinary(const uint8_t* bin, const size_t size);
+void packArraySize(const size_t size);
+void packMapSize(const size_t size);
+void packFixExt(const int8_t type, const T value);
+void packFixExt(const int8_t type, const uint64_t value_h, const uint64_t value_l);
+void packFixExt(const int8_t type, const uint8_t* ptr, const uint8_t size);
+void packFixExt(const int8_t type, const uint16_t* ptr, const uint8_t size);
+void packFixExt(const int8_t type, const uint32_t* ptr, const uint8_t size);
+void packFixExt(const int8_t type, const uint64_t* ptr, const uint8_t size);
+void packExt(const int8_t type, const T* ptr, const U size);
+void packExt(const object::ext& e);
+void packTimestamp(const object::timespec& time);
+
+// serializer for detailed msgpack format
+// serialize() and pack() are wrapper for these methods
 void packNil();
 void packNil(const object::nil_t& n);
 void packBool(const bool b);
@@ -523,21 +548,35 @@ void packInt64(const int64_t value);
 void packFloat32(const float value);
 void packFloat64(const double value);
 void packString5(const str_t& str);
+void packString5(const str_t& str, const size_t len);
 void packString5(const char* value);
+void packString5(const char* value, const size_t len);
 void packString8(const str_t& str);
+void packString8(const str_t& str, const size_t len);
 void packString8(const char* value);
+void packString8(const char* value, const size_t len);
 void packString16(const str_t& str);
+void packString16(const str_t& str, const size_t len);
 void packString16(const char* value);
+void packString16(const char* value, const size_t len);
 void packString32(const str_t& str);
+void packString32(const str_t& str, const size_t len);
 void packString32(const char* value);
+void packString32(const char* value, const size_t len);
+void packString5(const __FlashStringHelper* str);
+void packString5(const __FlashStringHelper* str, const size_t len);
+void packString8(const __FlashStringHelper* str);
+void packString8(const __FlashStringHelper* str, const size_t len);
+void packString16(const __FlashStringHelper* str);
+void packString16(const __FlashStringHelper* str, const size_t len);
+void packString32(const __FlashStringHelper* str);
+void packString32(const __FlashStringHelper* str, const size_t len);
 void packBinary8(const uint8_t* value, const uint8_t size);
 void packBinary16(const uint8_t* value, const uint16_t size);
 void packBinary32(const uint8_t* value, const uint32_t size);
-void packArraySize(const size_t size);
 void packArraySize4(const uint8_t value);
 void packArraySize16(const uint16_t value);
 void packArraySize32(const uint32_t value);
-void packMapSize(const size_t size);
 void packMapSize4(const uint8_t value);
 void packMapSize16(const uint16_t value);
 void packMapSize32(const uint32_t value);
@@ -554,24 +593,13 @@ void packFixExt8(const int8_t type, const uint64_t* ptr);
 void packFixExt16(const int8_t type, const uint64_t value_h, const uint64_t value_l);
 void packFixExt16(const int8_t type, const uint8_t* ptr);
 void packFixExt16(const int8_t type, const uint64_t* ptr);
-template <typename T>
-void packFixExt(const int8_t type, const T value);
-void packFixExt(const int8_t type, const uint64_t value_h, const uint64_t value_l);
-void packFixExt(const int8_t type, const uint8_t* ptr, const uint8_t size);
-void packFixExt(const int8_t type, const uint16_t* ptr, const uint8_t size);
-void packFixExt(const int8_t type, const uint32_t* ptr, const uint8_t size);
-void packFixExt(const int8_t type, const uint64_t* ptr, const uint8_t size);
 void packExtSize8(const int8_t type, const uint8_t size);
 void packExtSize16(const int8_t type, const uint16_t size);
 void packExtSize32(const int8_t type, const uint32_t size);
-template <typename T, typename U>
-void packExt(const int8_t type, const T* ptr, const U size);
-void packExt(const object::ext& e);
 void packTimestamp32(const uint32_t unix_time_sec);
 void packTimestamp64(const uint64_t unix_time);
 void packTimestamp64(const uint64_t unix_time_sec, const uint32_t unix_time_nsec);
 void packTimestamp96(const int64_t unix_time_sec, const uint32_t unix_time_nsec);
-void packTimestamp(const object::timespec& time);
 ```
 
 ### MsgPack::Unpacker
