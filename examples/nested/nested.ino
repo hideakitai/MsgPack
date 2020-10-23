@@ -32,12 +32,12 @@ void setup()
 
 
     MsgPack::map_size_t m3(3);
-        MsgPack::str_t kii; int ii;
-        MsgPack::str_t kff; float ff;
+        MsgPack::str_t kii; int ii {0};
+        MsgPack::str_t kff; float ff {0.f};
         MsgPack::str_t kaa; MsgPack::arr_size_t va2(2);
             MsgPack::str_t ss;
             MsgPack::map_size_t m2(2);
-                MsgPack::str_t kmff; int vmff;
+                MsgPack::str_t kmff; int vmff {0};
                 MsgPack::str_t kmss; MsgPack::str_t vmss;
 
     MsgPack::Unpacker unpacker;

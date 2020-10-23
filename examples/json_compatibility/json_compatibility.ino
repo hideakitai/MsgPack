@@ -19,8 +19,8 @@ void setup()
         float f = 45.678;
         MsgPack::str_t s = "9.9";
         // output from msgpack
-        int ii;
-        float ff;
+        int ii {0};
+        float ff {0.f};
         MsgPack::str_t ss;
 
         // pack to msgpack
@@ -52,8 +52,8 @@ void setup()
         MsgPack::str_t kf = "f"; float f = 45.678;
         MsgPack::str_t ks = "s"; MsgPack::str_t s = "9.9";
         // output from msgpack
-        MsgPack::str_t kii; int ii;
-        MsgPack::str_t kff; float ff;
+        MsgPack::str_t kii; int ii {0};
+        MsgPack::str_t kff; float ff {0.f};
         MsgPack::str_t kss; MsgPack::str_t ss;
 
         // pack to msgpack
