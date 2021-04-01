@@ -1,3 +1,4 @@
+// #define MSGPACK_DEBUGLOG_ENABLE
 #include <MsgPack.h>
 
 // input to msgpack
@@ -23,8 +24,7 @@ MsgPack::map_t<String, float> rm;
 // MsgPack::map_t -> arx::map
 // MsgPack::bin_t -> arx::vector<uint8_t> or <char>
 
-void setup()
-{
+void setup() {
     Serial.begin(115200);
     delay(2000);
 
@@ -49,6 +49,5 @@ void setup()
     Serial.println("msgpack test success");
 }
 
-void loop()
-{
+void loop() {
 }

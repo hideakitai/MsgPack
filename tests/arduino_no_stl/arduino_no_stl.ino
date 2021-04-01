@@ -14,6 +14,7 @@
 #define MSGPACK_MAX_OBJECT_SIZE 64
 #endif
 
+// #define MSGPACK_DEBUGLOG_ENABLE
 #include <MsgPack.h>
 
 namespace debug {

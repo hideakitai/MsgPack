@@ -1,4 +1,4 @@
-#define MSGPACK_DEBUGLOG_ENABLE
+// #define MSGPACK_DEBUGLOG_ENABLE
 #include <MsgPack.h>
 
 // serialize and deserialize nested structure

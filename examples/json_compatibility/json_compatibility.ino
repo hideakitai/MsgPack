@@ -1,16 +1,14 @@
+// #define MSGPACK_DEBUGLOG_ENABLE
 #include <MsgPack.h>
 
-void setup()
-{
+void setup() {
     Serial.begin(115200);
     delay(2000);
 
     Serial.println("msgpack test start");
 
-
     // json is always packed into json array or json object (Map)
     // so we always should wrap values into array or map format
-
 
     // as json array : [123, 45.678, "9,9"]
     {
@@ -44,17 +42,22 @@ void setup()
         if (s != ss) Serial.println("failed: string");
     }
 
-
     // as json object : {"i":123, "f":45.678, "s":"9,9"}
     {
         // input to msgpack
-        MsgPack::str_t ki = "i"; int i = 123;
-        MsgPack::str_t kf = "f"; float f = 45.678;
-        MsgPack::str_t ks = "s"; MsgPack::str_t s = "9.9";
+        MsgPack::str_t ki = "i";
+        int i = 123;
+        MsgPack::str_t kf = "f";
+        float f = 45.678;
+        MsgPack::str_t ks = "s";
+        MsgPack::str_t s = "9.9";
         // output from msgpack
-        MsgPack::str_t kii; int ii {0};
-        MsgPack::str_t kff; float ff {0.f};
-        MsgPack::str_t kss; MsgPack::str_t ss;
+        MsgPack::str_t kii;
+        int ii {0};
+        MsgPack::str_t kff;
+        float ff {0.f};
+        MsgPack::str_t kss;
+        MsgPack::str_t ss;
 
         // pack to msgpack
         MsgPack::Packer packer;
@@ -73,16 +76,15 @@ void setup()
         // unpacker.deserialize(MsgPack::map_size_t(3), kii, ii, kff, ff, kss, ss);
 
         if (ki != kii) Serial.println("failed: key of int");
-        if (i  != ii)  Serial.println("failed: int");
+        if (i != ii) Serial.println("failed: int");
         if (kf != kff) Serial.println("failed: key of float");
-        if (f  != ff)  Serial.println("failed: float");
+        if (f != ff) Serial.println("failed: float");
         if (ks != kss) Serial.println("failed: key of string");
-        if (s  != ss)  Serial.println("failed: string");
+        if (s != ss) Serial.println("failed: string");
     }
 
     Serial.println("msgpack test success");
 }
 
-void loop()
-{
+void loop() {
 }
