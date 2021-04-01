@@ -32,43 +32,37 @@ int32_t int32 = -1234567891;
 int64_t int64 = -1234567891234567891;
 
 float f = -12345.6789;
-double d =  -12345.6789;
+double d = -12345.6789;
 
 uint8_t arr_size4 = 5;
 
 uint8_t map_size4 = 3;
 
-
-struct CustomClassBase
-{
+struct CustomClassBase {
     int i;
     float f;
     MsgPack::str_t s;
 
-    bool operator== (const CustomClassBase& x) const
-    {
+    bool operator==(const CustomClassBase& x) const {
         return (x.i == i) && (x.f == f) && (x.s == s);
     }
 
     MSGPACK_DEFINE(i, f, s);
 };
 
-struct CustomClassDerived : public CustomClassBase
-{
+struct CustomClassDerived : public CustomClassBase {
     int ii;
     float ff;
     MsgPack::str_t ss;
 
-    bool operator== (const CustomClassDerived& x)
-    {
+    bool operator==(const CustomClassDerived& x) {
         return CustomClassBase::operator==(x) && (x.ii == ii) && (x.ff == ff) && (x.ss == ss);
     }
 
     MSGPACK_DEFINE(ii, ff, ss, MSGPACK_BASE(CustomClassBase));
 };
 
-struct CustomClassBaseMap
-{
+struct CustomClassBaseMap {
     MsgPack::str_t ki;
     int i;
     MsgPack::str_t kf;
@@ -76,16 +70,14 @@ struct CustomClassBaseMap
     MsgPack::str_t ks;
     MsgPack::str_t s;
 
-    bool operator== (const CustomClassBaseMap& x) const
-    {
+    bool operator==(const CustomClassBaseMap& x) const {
         return (x.i == i) && (x.f == f) && (x.s == s) && (x.ki == ki) && (x.kf == kf) && (x.ks == ks);
     }
 
     MSGPACK_DEFINE_MAP(ki, i, kf, f, ks, s);
 };
 
-struct CustomClassDerivedMap : public CustomClassBaseMap
-{
+struct CustomClassDerivedMap : public CustomClassBaseMap {
     MsgPack::str_t kii;
     int ii;
     MsgPack::str_t kff;
@@ -94,23 +86,21 @@ struct CustomClassDerivedMap : public CustomClassBaseMap
     MsgPack::str_t ss;
     MsgPack::str_t kb;
 
-    bool operator== (const CustomClassDerivedMap& x)
-    {
+    bool operator==(const CustomClassDerivedMap& x) {
         return CustomClassBaseMap::operator==(x) && (x.ii == ii) && (x.ff == ff) && (x.ss == ss) && (x.kii == kii) && (x.kff == kff) && (x.kss == kss);
     }
 
     MSGPACK_DEFINE_MAP(kii, ii, kff, ff, kss, ss, kb, MSGPACK_BASE(CustomClassBaseMap));
 };
 
-
-
 // serialize and deserialize nested structure
 // {"i":i, "f":f, "a":["str", {"first":1, "second":"two"}]}
 
-struct MyMap
-{
-    MsgPack::str_t key_first; int i;
-    MsgPack::str_t key_second; MsgPack::str_t s;
+struct MyMap {
+    MsgPack::str_t key_first;
+    int i;
+    MsgPack::str_t key_second;
+    MsgPack::str_t s;
 
     bool operator==(const MyMap& x) { return (key_first == x.key_first) && (i == x.i) && (key_second == x.key_second) && (s == x.s); }
     bool operator!=(const MyMap& x) { return !(*this == x); }
@@ -118,8 +108,7 @@ struct MyMap
     MSGPACK_DEFINE_MAP(key_first, i, key_second, s);
 };
 
-struct MyArr
-{
+struct MyArr {
     MsgPack::str_t s;
     MyMap m;
 
@@ -129,10 +118,11 @@ struct MyArr
     MSGPACK_DEFINE(s, m);
 };
 
-struct MyNestedClass
-{
-    MsgPack::str_t key_i; int i;
-    MsgPack::str_t key_f; int f;
+struct MyNestedClass {
+    MsgPack::str_t key_i;
+    int i;
+    MsgPack::str_t key_f;
+    int f;
     MsgPack::str_t key_a;
     MyArr arr;
 
@@ -142,11 +132,7 @@ struct MyNestedClass
     MSGPACK_DEFINE_MAP(key_i, i, key_f, f, key_a, arr);
 };
 
-
-
-
-int main ()
-{
+int main() {
     std::cout << "msgpack test start" << std::endl;
 
     {
@@ -172,7 +158,6 @@ int main ()
         packer.pack(t);
         packer.pack(f);
 
-
         // ---------- unpack ----------
 
         MsgPack::Unpacker unpacker;
@@ -188,7 +173,6 @@ int main ()
         assert(unpacker.unpackBool() == true);
         assert(unpacker.unpackBool() == false);
     }
-
 
     {
         MsgPack::Packer packer;
@@ -227,7 +211,6 @@ int main ()
         packer.pack(-12345.6789f);
         packer.pack(-12345.6789);
 
-
         // ---------- INT format family ----------
 
         packer.packUInt7(intu7);
@@ -265,7 +248,6 @@ int main ()
         // wrappers
         packer.pack(f);
         packer.pack(d);
-
 
         // ---------- unpack ----------
 
@@ -364,7 +346,6 @@ int main ()
         packer.pack(str5, strlen(str5));
         packer.pack(str8, strlen(str8));
         packer.pack(str16, strlen(str16));
-
 
         MsgPack::Unpacker unpacker;
         unpacker.feed(packer.data(), packer.size());
@@ -555,15 +536,14 @@ int main ()
         // ---------- ARRAY format family ----------
 
         packer.packArraySize4(arr_size4);
-            packer.packUInt7(intu7);
-            packer.packInt5(int5);
-            packer.packUInt8(intu8);
-            packer.packInt8(int8);
-            packer.packString5(str5);
+        packer.packUInt7(intu7);
+        packer.packInt5(int5);
+        packer.packUInt8(intu8);
+        packer.packInt8(int8);
+        packer.packString5(str5);
         // TODO:
         // packer.packArraySize16();
         // packer.packArraySize32();
-
 
         // wrappers
         uint16_t arr_uint16[5] {1, 2, 3, 4, 5};
@@ -630,17 +610,15 @@ int main ()
         for (int i = 1; i <= 5; ++i) umm.insert(std::make_pair(std::to_string(i), i));
         packer.pack(umm);
 
-
-
         MsgPack::Unpacker unpacker;
         unpacker.feed(packer.data(), packer.size());
 
         assert(unpacker.unpackArraySize() == arr_size4);
-            assert(unpacker.unpackUInt7() == intu7);
-            assert(unpacker.unpackInt5() == int5);
-            assert(unpacker.unpackUInt8() == intu8);
-            assert(unpacker.unpackInt8() == int8);
-            assert(unpacker.unpackString5() == MsgPack::str_t(str5));
+        assert(unpacker.unpackUInt7() == intu7);
+        assert(unpacker.unpackInt5() == int5);
+        assert(unpacker.unpackUInt8() == intu8);
+        assert(unpacker.unpackInt8() == int8);
+        assert(unpacker.unpackString5() == MsgPack::str_t(str5));
         // TODO:
         // assert(unpacker.unpackArraySize() == arr_size16);
         // assert(unpacker.unpackArraySize() == arr_size32);
@@ -730,16 +708,15 @@ int main ()
         // ---------- MAP format family ----------
 
         packer.packMapSize4(map_size4);
-            packer.packString5(str5);
-            packer.packUInt7(intu7);
-            packer.packString5(str5);
-            packer.packInt5(int5);
-            packer.packString5(str5);
-            packer.packFloat32(f);
+        packer.packString5(str5);
+        packer.packUInt7(intu7);
+        packer.packString5(str5);
+        packer.packInt5(int5);
+        packer.packString5(str5);
+        packer.packFloat32(f);
         // TODO:
         // packer.packMapSize16();
         // packer.packMapSize32();
-
 
         MsgPack::Unpacker unpacker;
         unpacker.feed(packer.data(), packer.size());
@@ -767,14 +744,22 @@ int main ()
         uint32_t e4 = 1234567891;
         uint64_t e8 = 123456789123456789;
         union {
-            struct { uint64_t l; uint64_t h; };
+            struct {
+                uint64_t l;
+                uint64_t h;
+            };
             uint8_t b[sizeof(uint64_t) * 2];
-        } e16_ { e8, e8 };
+        } e16_ {e8, e8};
         MsgPack::object::ext e16(16, e16_.b, sizeof(e16_));
         union {
-            struct { uint64_t ll; uint64_t lh; uint64_t hl; uint64_t hh; };
+            struct {
+                uint64_t ll;
+                uint64_t lh;
+                uint64_t hl;
+                uint64_t hh;
+            };
             uint8_t b[sizeof(uint64_t) * 4];
-        } e32_ { e8, e8, e8, e8 };
+        } e32_ {e8, e8, e8, e8};
         MsgPack::object::ext e32(32, e32_.b, sizeof(e32_));
         uint8_t es8[123];
         for (auto& e : es8) e = 8;
@@ -897,10 +882,10 @@ int main ()
     {
         // ---------- TIMESTAMP format family ----------
 
-        MsgPack::object::timespec tv32 { 12345, 0 };
-        MsgPack::object::timespec tv64 { 17179869180, 1073741820 };
+        MsgPack::object::timespec tv32 {12345, 0};
+        MsgPack::object::timespec tv64 {17179869180, 1073741820};
         uint64_t utime64 = ((tv64.tv_nsec & 0x00000003FFFFFFFF) << 34) | (uint64_t)(tv64.tv_sec & 0x3FFFFFFFF);
-        MsgPack::object::timespec tv96 { 18000000000, 1100000000 };
+        MsgPack::object::timespec tv96 {18000000000, 1100000000};
 
         MsgPack::Packer packer;
 
@@ -912,7 +897,6 @@ int main ()
         packer.packTimestamp(tv32);
         packer.packTimestamp(tv64);
         packer.packTimestamp(tv96);
-
 
         MsgPack::object::timespec r_tv32, r_tv64, r_tv96;
 
@@ -935,7 +919,6 @@ int main ()
         unpacker.unpack(r_tv96);
         assert(r_tv96 == tv96);
     }
-
 
     // practical use
     {
@@ -999,9 +982,7 @@ int main ()
             arr_v, arr_a, arr_d, arr_p,
             arr_tp,
             arr_l, arr_fl, arr_s, arr_us, arr_ms, arr_ums,
-            m, um, mm, umm
-        );
-
+            m, um, mm, umm);
 
         // Bool
         bool r_b1;
@@ -1065,9 +1046,7 @@ int main ()
             r_arr_v, r_arr_a, r_arr_d, r_arr_p,
             r_arr_tp,
             r_arr_l, r_arr_fl, r_arr_s, r_arr_us, r_arr_ms, r_arr_ums,
-            r_m, r_um, r_mm, r_umm
-        );
-
+            r_m, r_um, r_mm, r_umm);
 
         // Bool
         assert(r_b1 == b1);
@@ -1228,16 +1207,28 @@ int main ()
         CustomClassBase c {7, 8.8, "9.9"};
         CustomClassBase r_a, r_b, r_c;
 
-        CustomClassDerived d;// {1, 2.2, "3.3"};
-        CustomClassDerived e;// {4, 5.5, "6.6"};
-        CustomClassDerived f;// {7, 8.8, "9.9"};
+        CustomClassDerived d;  // {1, 2.2, "3.3"};
+        CustomClassDerived e;  // {4, 5.5, "6.6"};
+        CustomClassDerived f;  // {7, 8.8, "9.9"};
         CustomClassDerived r_d, r_e, r_f;
-        d.ii = 1; d.ff = 2.2; d.ss = "3.3";
-        d.i = 4; d.f = 5.5; d.s = "6.6";
-        e.ii = 4; e.ff = 5.5; e.ss = "6.6";
-        e.i = 7; e.f = 8.8; e.s = "9.9";
-        f.ii = 7; f.ff = 8.8; f.ss = "9.9";
-        f.i = 1; f.f = 2.2; f.s = "3.3";
+        d.ii = 1;
+        d.ff = 2.2;
+        d.ss = "3.3";
+        d.i = 4;
+        d.f = 5.5;
+        d.s = "6.6";
+        e.ii = 4;
+        e.ff = 5.5;
+        e.ss = "6.6";
+        e.i = 7;
+        e.f = 8.8;
+        e.s = "9.9";
+        f.ii = 7;
+        f.ff = 8.8;
+        f.ss = "9.9";
+        f.i = 1;
+        f.f = 2.2;
+        f.s = "3.3";
 
         MsgPack::Packer packer;
         packer.pack(a);
@@ -1268,25 +1259,49 @@ int main ()
         CustomClassBaseMap c {"i", 7, "f", 8.8, "s", "9.9"};
         CustomClassBaseMap r_a, r_b, r_c;
 
-        CustomClassDerivedMap d;// {1, 2.2, "3.3"};
-        CustomClassDerivedMap e;// {4, 5.5, "6.6"};
-        CustomClassDerivedMap f;// {7, 8.8, "9.9"};
+        CustomClassDerivedMap d;  // {1, 2.2, "3.3"};
+        CustomClassDerivedMap e;  // {4, 5.5, "6.6"};
+        CustomClassDerivedMap f;  // {7, 8.8, "9.9"};
         CustomClassDerivedMap r_d, r_e, r_f;
-        d.kii = "ii"; d.kff = "ff"; d.kss = "ss";
+        d.kii = "ii";
+        d.kff = "ff";
+        d.kss = "ss";
         d.kb = "base";
-        d.ii = 1; d.ff = 2.2; d.ss = "3.3";
-        d.ki = "i"; d.kf = "f"; d.ks = "s";
-        d.i = 4; d.f = 5.5; d.s = "6.6";
-        e.kii = "ii"; e.kff = "ff"; e.kss = "ss";
+        d.ii = 1;
+        d.ff = 2.2;
+        d.ss = "3.3";
+        d.ki = "i";
+        d.kf = "f";
+        d.ks = "s";
+        d.i = 4;
+        d.f = 5.5;
+        d.s = "6.6";
+        e.kii = "ii";
+        e.kff = "ff";
+        e.kss = "ss";
         e.kb = "base";
-        e.ii = 4; e.ff = 5.5; e.ss = "6.6";
-        e.ki = "i"; e.kf = "f"; e.ks = "s";
-        e.i = 7; e.f = 8.8; e.s = "9.9";
-        f.kii = "ii"; f.kff = "ff"; f.kss = "ss";
+        e.ii = 4;
+        e.ff = 5.5;
+        e.ss = "6.6";
+        e.ki = "i";
+        e.kf = "f";
+        e.ks = "s";
+        e.i = 7;
+        e.f = 8.8;
+        e.s = "9.9";
+        f.kii = "ii";
+        f.kff = "ff";
+        f.kss = "ss";
         f.kb = "base";
-        f.ii = 7; f.ff = 8.8; f.ss = "9.9";
-        f.ki = "i"; f.kf = "f"; f.ks = "s";
-        f.i = 1; f.f = 2.2; f.s = "3.3";
+        f.ii = 7;
+        f.ff = 8.8;
+        f.ss = "9.9";
+        f.ki = "i";
+        f.kf = "f";
+        f.ks = "s";
+        f.i = 1;
+        f.f = 2.2;
+        f.s = "3.3";
 
         MsgPack::Packer packer;
         packer.pack(a);
@@ -1314,30 +1329,37 @@ int main ()
 
     // nested
     {
-        MsgPack::str_t ki {"i"}; int i {1};
-        MsgPack::str_t kf {"f"}; float f {2.2};
+        MsgPack::str_t ki {"i"};
+        int i {1};
+        MsgPack::str_t kf {"f"};
+        float f {2.2};
         MsgPack::str_t ka {"a"};
-            MsgPack::str_t s {"str"};
-                MsgPack::str_t kmf {"first"}; int vmf {1};
-                MsgPack::str_t kms {"second"}; MsgPack::str_t vms {"two"};
+        MsgPack::str_t s {"str"};
+        MsgPack::str_t kmf {"first"};
+        int vmf {1};
+        MsgPack::str_t kms {"second"};
+        MsgPack::str_t vms {"two"};
 
         MsgPack::Packer packer;
         packer.serialize(MsgPack::map_size_t(3),
-            ki, i,
-            kf, f,
-            ka, MsgPack::arr_size_t(2),
-                s,
-                MsgPack::map_size_t(2),
-                    kmf, vmf,
-                    kms, vms
-        );
+                         ki, i,
+                         kf, f,
+                         ka, MsgPack::arr_size_t(2),
+                         s,
+                         MsgPack::map_size_t(2),
+                         kmf, vmf,
+                         kms, vms);
 
-        MsgPack::str_t kii; int ii;
-        MsgPack::str_t kff; float ff;
+        MsgPack::str_t kii;
+        int ii;
+        MsgPack::str_t kff;
+        float ff;
         MsgPack::str_t kaa;
-            MsgPack::str_t ss;
-                MsgPack::str_t kmff; int vmff;
-                MsgPack::str_t kmss; MsgPack::str_t vmss;
+        MsgPack::str_t ss;
+        MsgPack::str_t kmff;
+        int vmff;
+        MsgPack::str_t kmss;
+        MsgPack::str_t vmss;
 
         MsgPack::Unpacker unpacker;
         MsgPack::map_size_t msz1;
@@ -1345,23 +1367,22 @@ int main ()
         MsgPack::map_size_t msz2;
         unpacker.feed(packer.data(), packer.size());
         unpacker.deserialize(msz1,
-            kii, ii,
-            kff, ff,
-            kaa, asz1,
-                ss,
-                msz2,
-                    kmff, vmff,
-                    kmss, vmss
-        );
+                             kii, ii,
+                             kff, ff,
+                             kaa, asz1,
+                             ss,
+                             msz2,
+                             kmff, vmff,
+                             kmss, vmss);
 
         assert(msz1.size() == 3);
-        assert(kii  == ki);
-        assert(ii   == i);
-        assert(kff  == kf);
-        assert(ff   == f);
-        assert(kaa  == ka);
+        assert(kii == ki);
+        assert(ii == i);
+        assert(kff == kf);
+        assert(ff == f);
+        assert(kaa == ka);
         assert(asz1.size() == 2);
-        assert(ss   == s);
+        assert(ss == s);
         assert(msz2.size() == 2);
         assert(kmff == kmf);
         assert(vmff == vmf);
@@ -1372,14 +1393,16 @@ int main ()
     // nested class
     {
         MyNestedClass c;
-        c.key_i = "i"; c.i = 1;
-        c.key_f = "f"; c.f = 2.2f;
+        c.key_i = "i";
+        c.i = 1;
+        c.key_f = "f";
+        c.f = 2.2f;
         c.key_a = "a";
-            c.arr.s = "str";
-                c.arr.m.key_first = "first";
-                c.arr.m.i = 1;
-                c.arr.m.key_second = "second";
-                c.arr.m.s = "two";
+        c.arr.s = "str";
+        c.arr.m.key_first = "first";
+        c.arr.m.i = 1;
+        c.arr.m.key_second = "second";
+        c.arr.m.s = "two";
 
         MsgPack::Packer packer;
         packer.serialize(c);

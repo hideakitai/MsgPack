@@ -3,34 +3,34 @@
 // #define TEST_BINARY
 
 #ifdef TEST_BINARY
-    #define MSGPACK_MAX_PACKET_BYTE_SIZE 128
-    #define MSGPACK_MAX_ARRAY_SIZE 16
-    #define MSGPACK_MAX_MAP_SIZE 16
-    #define MSGPACK_MAX_OBJECT_SIZE 64
+#define MSGPACK_MAX_PACKET_BYTE_SIZE 128
+#define MSGPACK_MAX_ARRAY_SIZE 16
+#define MSGPACK_MAX_MAP_SIZE 16
+#define MSGPACK_MAX_OBJECT_SIZE 64
 #else
-    #define MSGPACK_MAX_PACKET_BYTE_SIZE 300
-    #define MSGPACK_MAX_ARRAY_SIZE 16
-    #define MSGPACK_MAX_MAP_SIZE 16
-    #define MSGPACK_MAX_OBJECT_SIZE 64
+#define MSGPACK_MAX_PACKET_BYTE_SIZE 300
+#define MSGPACK_MAX_ARRAY_SIZE 16
+#define MSGPACK_MAX_MAP_SIZE 16
+#define MSGPACK_MAX_OBJECT_SIZE 64
 #endif
 
 #include <MsgPack.h>
 
-namespace debug
-{
-    void assert(bool b, const char* file, int line, const char* func, const char* expr)
-    {
-        // while (!b)
-        if (!b)
-        {
-            Serial.print("[ASSERT] ");
-            Serial.print(file); Serial.print(":");
-            Serial.print(line); Serial.print(":");
-            Serial.print(func); Serial.print("() : ");
-            Serial.println(expr);
-        }
+namespace debug {
+void assert(bool b, const char* file, int line, const char* func, const char* expr) {
+    // while (!b)
+    if (!b) {
+        Serial.print("[ASSERT] ");
+        Serial.print(file);
+        Serial.print(":");
+        Serial.print(line);
+        Serial.print(":");
+        Serial.print(func);
+        Serial.print("() : ");
+        Serial.println(expr);
     }
 }
+}  // namespace debug
 
 #ifndef assert
 #define assert(b) ::debug::assert((b), __FILE__, __LINE__, __func__, #b)
@@ -53,14 +53,13 @@ int32_t int32 = -1234567891;
 int64_t int64 = -1234567891234567891;
 
 float f = -12345.6789f;
-double d =  -12345.6789d;
+double d = -12345.6789d;
 
 uint8_t arr_size4 = 5;
 
 uint8_t map_size4 = 3;
 
-void setup()
-{
+void setup() {
     Serial.begin(115200);
     delay(2000);
 
@@ -90,7 +89,6 @@ void setup()
         packer.pack(t);
         packer.pack(f);
 
-
         // ---------- unpack ----------
 
         MsgPack::Unpacker unpacker;
@@ -106,7 +104,6 @@ void setup()
         assert(unpacker.unpackBool() == true);
         assert(unpacker.unpackBool() == false);
     }
-
 
     {
         MsgPack::Packer packer;
@@ -145,7 +142,6 @@ void setup()
         packer.pack(-12345.6789f);
         packer.pack(-12345.6789d);
 
-
         // ---------- INT format family ----------
 
         packer.packUInt7(intu7);
@@ -183,7 +179,6 @@ void setup()
         // wrappers
         packer.pack(f);
         packer.pack(d);
-
 
         // ---------- unpack ----------
 
@@ -277,7 +272,6 @@ void setup()
         packer.pack(MsgPack::str_t(str16));
         // packer.pack(str32); // TODO:
 
-
         MsgPack::Unpacker unpacker;
         unpacker.feed(packer.data(), packer.size());
 
@@ -356,25 +350,24 @@ void setup()
         // ---------- ARRAY format family ----------
 
         packer.packArraySize4(arr_size4);
-            packer.packUInt7(intu7);
-            packer.packInt5(int5);
-            packer.packUInt8(intu8);
-            packer.packInt8(int8);
-            packer.packString5(str5);
+        packer.packUInt7(intu7);
+        packer.packInt5(int5);
+        packer.packUInt8(intu8);
+        packer.packInt8(int8);
+        packer.packString5(str5);
         // TODO:
         // packer.packArraySize16();
         // packer.packArraySize32();
-
 
         MsgPack::Unpacker unpacker;
         unpacker.feed(packer.data(), packer.size());
 
         assert(unpacker.unpackArraySize() == arr_size4);
-            assert(unpacker.unpackUInt7() == intu7);
-            assert(unpacker.unpackInt5() == int5);
-            assert(unpacker.unpackUInt8() == intu8);
-            assert(unpacker.unpackInt8() == int8);
-            assert(unpacker.unpackString5() == MsgPack::str_t(str5));
+        assert(unpacker.unpackUInt7() == intu7);
+        assert(unpacker.unpackInt5() == int5);
+        assert(unpacker.unpackUInt8() == intu8);
+        assert(unpacker.unpackInt8() == int8);
+        assert(unpacker.unpackString5() == MsgPack::str_t(str5));
         // TODO:
         // assert(unpacker.unpackArraySize() == arr_size16);
         // assert(unpacker.unpackArraySize() == arr_size32);
@@ -385,27 +378,26 @@ void setup()
         // ---------- MAP format family ----------
 
         packer.packMapSize4(map_size4);
-            packer.packString5(str5);
-            packer.packUInt7(intu7);
-            packer.packString5(str5);
-            packer.packInt5(int5);
-            packer.packString5(str5);
-            packer.packFloat32(f);
+        packer.packString5(str5);
+        packer.packUInt7(intu7);
+        packer.packString5(str5);
+        packer.packInt5(int5);
+        packer.packString5(str5);
+        packer.packFloat32(f);
         // TODO:
         // packer.packMapSize16();
         // packer.packMapSize32();
-
 
         MsgPack::Unpacker unpacker;
         unpacker.feed(packer.data(), packer.size());
 
         assert(unpacker.unpackMapSize() == map_size4);
-            assert(unpacker.unpackString5() == MsgPack::str_t(str5));
-            assert(unpacker.unpackUInt7() == intu7);
-            assert(unpacker.unpackString5() == MsgPack::str_t(str5));
-            assert(unpacker.unpackInt5() == int5);
-            assert(unpacker.unpackString5() == MsgPack::str_t(str5));
-            assert(unpacker.unpackFloat32() == f);
+        assert(unpacker.unpackString5() == MsgPack::str_t(str5));
+        assert(unpacker.unpackUInt7() == intu7);
+        assert(unpacker.unpackString5() == MsgPack::str_t(str5));
+        assert(unpacker.unpackInt5() == int5);
+        assert(unpacker.unpackString5() == MsgPack::str_t(str5));
+        assert(unpacker.unpackFloat32() == f);
         // assert(unpacker.unpackMapSize() == map_size16);
         // assert(unpacker.unpackMapSize() == map_size32);
     }
@@ -432,11 +424,8 @@ void setup()
     //     // packer.packTimestamp64();
     //     // packer.packTimestamp96();
 
-
     //     MsgPack::Unpacker unpacker;
     //     unpacker.feed(packer.data(), packer.size());
-
-
 
     // }
 
@@ -444,11 +433,8 @@ void setup()
     {
     }
 
-
     Serial.println("test success");
 }
 
-
-void loop()
-{
+void loop() {
 }

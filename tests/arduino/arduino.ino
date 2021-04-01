@@ -15,7 +15,6 @@
 #include <unordered_map>
 #include <unordered_set>
 
-
 const char str0[2] = "A";
 const char str5[31] = "123456789012";
 const char str8[255] = "01234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012";
@@ -33,14 +32,13 @@ int32_t int32 = -1234567891;
 int64_t int64 = -1234567891234567891;
 
 float f = -12345.6789;
-double d =  -12345.6789;
+double d = -12345.6789;
 
 uint8_t arr_size4 = 5;
 
 uint8_t map_size4 = 3;
 
-void setup()
-{
+void setup() {
     Serial.begin(115200);
 
     delay(2000);
@@ -117,7 +115,6 @@ void setup()
             mm
             // umm
         );
-
 
         // Bool
         bool r_b1 {false};
@@ -289,11 +286,8 @@ void setup()
         assert(s6 == ss6);
     }
 
-
     Serial.println("test success");
 }
 
-
-void loop()
-{
+void loop() {
 }
