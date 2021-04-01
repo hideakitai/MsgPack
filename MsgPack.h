@@ -2,7 +2,7 @@
 #ifndef HT_SERIAL_MSGPACK_H
 #define HT_SERIAL_MSGPACK_H
 
-#ifndef MSGPACK_ENABLE_DEBUG_LOG
+#ifndef MSGPACK_DEBUGLOG_ENABLE
 #define NDEBUG  // disable conversion warning
 #endif
 

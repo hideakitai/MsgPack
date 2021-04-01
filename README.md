@@ -397,7 +397,7 @@ unpacker.deserialize(r); // deserialize timestamp type
 Error information report is disabled by default. You can enable it by defining this macro.
 
 ```C++
-#define MSGPACK_ENABLE_DEBUG_LOG
+#define MSGPACK_DEBUGLOG_ENABLE
 ```
 
 Also you can change debug info stream by calling this macro (default: `Serial`).

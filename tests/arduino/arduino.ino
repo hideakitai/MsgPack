@@ -1,4 +1,4 @@
-#define MSGPACK_ENABLE_DEBUG_LOG
+#define MSGPACK_DEBUGLOG_ENABLE
 #include <Arduino.h>
 #include <MsgPack.h>
 
