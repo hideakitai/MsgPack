@@ -76,6 +76,27 @@ namespace serial {
                 }
             }
 
+#ifdef ARDUINOJSON_VERSION
+
+        private:
+            void deserialize_arduinojson(JsonDocument& doc) {
+                auto err = deserializeMsgPack(doc, raw_data);
+                if (err) {
+                    LOG_ERROR("deserializeJson() faled: ", err.c_str());
+                }
+            }
+
+        public:
+            template <size_t N>
+            void deserialize(StaticJsonDocument<N>& doc) {
+                deserialize_arduinojson(doc);
+            }
+            void deserialize(DynamicJsonDocument& doc) {
+                deserialize_arduinojson(doc);
+            }
+
+#endif  // ARDUINOJSON_VERSION
+
             template <typename... Args>
             void from_array(Args&&... args) {
                 static arr_size_t sz;
