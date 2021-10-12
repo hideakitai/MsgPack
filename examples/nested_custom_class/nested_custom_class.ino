@@ -1,4 +1,4 @@
-// #define MSGPACK_DEBUGLOG_ENABLE
+#define MSGPACK_DEBUGLOG_ENABLE
 #include <MsgPack.h>
 
 // serialize and deserialize nested structure
@@ -11,8 +11,12 @@ struct MyMap {
     MsgPack::str_t s;
     MSGPACK_DEFINE_MAP(key_first, i, key_second, s);
 
-    bool operator==(const MyMap& x) { return (key_first == x.key_first) && (i == x.i) && (key_second == x.key_second) && (s == x.s); }
-    bool operator!=(const MyMap& x) { return !(*this == x); }
+    bool operator==(const MyMap& x) {
+        return (key_first == x.key_first) && (i == x.i) && (key_second == x.key_second) && (s == x.s);
+    }
+    bool operator!=(const MyMap& x) {
+        return !(*this == x);
+    }
 };
 
 struct MyArr {
@@ -20,8 +24,12 @@ struct MyArr {
     MyMap m;
     MSGPACK_DEFINE(s, m);
 
-    bool operator==(const MyArr& x) { return (s == x.s) && (m == x.m); }
-    bool operator!=(const MyArr& x) { return !(*this == x); }
+    bool operator==(const MyArr& x) {
+        return (s == x.s) && (m == x.m);
+    }
+    bool operator!=(const MyArr& x) {
+        return !(*this == x);
+    }
 };
 
 struct MyNestedClass {
@@ -33,8 +41,12 @@ struct MyNestedClass {
     MyArr arr;
     MSGPACK_DEFINE_MAP(key_i, i, key_f, f, key_a, arr);
 
-    bool operator==(const MyNestedClass& x) { return (key_i == x.key_i) && (i == x.i) && (key_f == x.key_f) && (f == x.f) && (key_a == x.key_a); }
-    bool operator!=(const MyNestedClass& x) { return !(*this == x); }
+    bool operator==(const MyNestedClass& x) {
+        return (key_i == x.key_i) && (i == x.i) && (key_f == x.key_f) && (f == x.f) && (key_a == x.key_a);
+    }
+    bool operator!=(const MyNestedClass& x) {
+        return !(*this == x);
+    }
 };
 
 void setup() {
@@ -68,5 +80,4 @@ void setup() {
     Serial.println("msgpack test success");
 }
 
-void loop() {
-}
+void loop() {}

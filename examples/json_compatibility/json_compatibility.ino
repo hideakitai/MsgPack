@@ -1,4 +1,4 @@
-// #define MSGPACK_DEBUGLOG_ENABLE
+#define MSGPACK_DEBUGLOG_ENABLE
 #include <MsgPack.h>
 
 void setup() {
@@ -86,5 +86,4 @@ void setup() {
     Serial.println("msgpack test success");
 }
 
-void loop() {
-}
+void loop() {}

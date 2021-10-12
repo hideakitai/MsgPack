@@ -1,4 +1,4 @@
-// #define MSGPACK_DEBUGLOG_ENABLE
+#define MSGPACK_DEBUGLOG_ENABLE
 #include <MsgPack.h>
 
 // serialize and deserialize nested structure
@@ -24,13 +24,18 @@ void setup() {
     MsgPack::Packer packer;
     packer.serialize(
         MsgPack::map_size_t(3),
-        ki, i,
-        kf, f,
-        ka, MsgPack::arr_size_t(2),
+        ki,
+        i,
+        kf,
+        f,
+        ka,
+        MsgPack::arr_size_t(2),
         s,
         MsgPack::map_size_t(2),
-        kmf, vmf,
-        kms, vms);
+        kmf,
+        vmf,
+        kms,
+        vms);
 
     MsgPack::map_size_t m3(3);
     MsgPack::str_t kii;
@@ -48,15 +53,7 @@ void setup() {
 
     MsgPack::Unpacker unpacker;
     unpacker.feed(packer.data(), packer.size());
-    unpacker.deserialize(
-        m3,
-        kii, ii,
-        kff, ff,
-        kaa, va2,
-        ss,
-        m2,
-        kmff, vmff,
-        kmss, vmss);
+    unpacker.deserialize(m3, kii, ii, kff, ff, kaa, va2, ss, m2, kmff, vmff, kmss, vmss);
 
     if (kii != ki) Serial.println("failed: ki");
     if (ii != i) Serial.println("failed: i");
@@ -72,5 +69,4 @@ void setup() {
     Serial.println("msgpack test success");
 }
 
-void loop() {
-}
+void loop() {}

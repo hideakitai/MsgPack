@@ -1,4 +1,4 @@
-// #define MSGPACK_DEBUGLOG_ENABLE
+#define MSGPACK_DEBUGLOG_ENABLE
 #include <MsgPack.h>
 
 struct CustomClassBase {
@@ -50,7 +50,8 @@ struct CustomClassDerivedMap : public CustomClassBaseMap {
     MsgPack::str_t kb;
 
     bool operator!=(const CustomClassDerivedMap& x) {
-        return CustomClassBaseMap::operator!=(x) || (x.ii != ii) || (x.ff != ff) || (x.ss != ss) || (x.kii != kii) || (x.kff != kff) || (x.kss != kss);
+        return CustomClassBaseMap::operator!=(x) || (x.ii != ii) || (x.ff != ff) || (x.ss != ss) || (x.kii != kii)
+            || (x.kff != kff) || (x.kss != kss);
     }
 
     MSGPACK_DEFINE_MAP(kii, ii, kff, ff, kss, ss, kb, MSGPACK_BASE(CustomClassBaseMap));
@@ -140,5 +141,4 @@ void setup() {
     Serial.println("msgpack test success");
 }
 
-void loop() {
-}
+void loop() {}
