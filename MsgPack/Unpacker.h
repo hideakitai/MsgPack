@@ -34,7 +34,7 @@ namespace msgpack {
         uint8_t* raw_data {nullptr};
         idx_t indices;
         size_t curr_index {0};
-        bool b_decoded {false};
+        bool b_size_matched {false};
 
 #define MSGPACK_DECODABLE_CHECK(T)                 \
     if (curr_index >= indices.size()) {            \
@@ -51,14 +51,14 @@ namespace msgpack {
             raw_data = (uint8_t*)data;
             for (size_t i = 0; i < size; i += getElementSize(indices.size() - 1)) indices.emplace_back(i);
             const size_t decoded_size = indices.back() + getElementSize(indices.size() - 1);
-            b_decoded = (size == decoded_size);
-            if (!b_decoded) LOG_ERROR(F("decoded binary size"), decoded_size, F("not matched to"), size);
-            return b_decoded;
+            b_size_matched = (size == decoded_size);
+            if (!b_size_matched) LOG_ERROR(F("decoded binary size"), decoded_size, F("not matched to"), size);
+            return b_size_matched;
         }
 
         template <typename First, typename... Rest>
         void deserialize(First& first, Rest&&... rest) {
-            if (!b_decoded || indices.empty()) {
+            if (!b_size_matched || indices.empty()) {
                 LOG_WARN(F("correct binary data was not supplied yet"));
                 return;
             }
@@ -74,7 +74,7 @@ namespace msgpack {
             if (curr_index >= indices.size()) {
                 if (curr_index > indices.size())
                     LOG_ERROR("index overflow:", curr_index, "must be <=", indices.size());
-                b_decoded = false;
+                b_size_matched = false;
             }
         }
 
@@ -126,7 +126,7 @@ namespace msgpack {
         void to_tuple() {}
 
         bool available() const {
-            return b_decoded;
+            return b_size_matched;
         }
         size_t size() const {
             return indices.size();
@@ -140,7 +140,7 @@ namespace msgpack {
         void clear() {
             indices.clear();
             index(0);
-            b_decoded = false;
+            b_size_matched = false;
             raw_data = nullptr;
         }
 
