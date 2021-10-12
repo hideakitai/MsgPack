@@ -615,27 +615,28 @@ bool feed(const uint8_t* data, size_t size);
 
 // variable sized deserializer
 template <typename First, typename ...Rest>
-void deserialize(First& first, Rest&&... rest);
+bool deserialize(First& first, Rest&&... rest);
 template <size_t N>
-void deserialize(StaticJsonDocument<N>& doc);
-void deserialize(DynamicJsonDocument& doc);
+bool deserialize(StaticJsonDocument<N>& doc);
+bool deserialize(DynamicJsonDocument& doc);
 
 // varibale sized desrializer for array and map
 template <typename ...Args>
-void from_array(Args&&... args);
+bool from_array(Args&&... args);
 template <typename ...Args>
-void from_map(Args&&... args);
+bool from_map(Args&&... args);
 
 // single arg deserializer
 template <typename T>
-void unpack(T& value);
+bool unpack(T& value);
 
 // check if next arg can be deserialized to value
 template <typename T>
 bool unpackable(const T& value) const;
 
 // accesor and utility for deserialized msgpack data
-bool available() const;
+bool decode_ready() const;
+bool decoded() const;
 size_t size() const;
 void index(const size_t i);
 size_t index() const;

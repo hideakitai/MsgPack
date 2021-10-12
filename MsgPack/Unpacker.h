@@ -1,4 +1,3 @@
-
 #pragma once
 #ifndef HT_SERIAL_MSGPACK_UNPACKER_H
 #define HT_SERIAL_MSGPACK_UNPACKER_H
@@ -35,11 +34,15 @@ namespace msgpack {
         idx_t indices;
         size_t curr_index {0};
         bool b_size_matched {false};
+        bool b_decode_success {false};
 
 #define MSGPACK_DECODABLE_CHECK(T)                 \
     if (curr_index >= indices.size()) {            \
         LOG_ERROR(F("no more decodable objects")); \
+        b_decode_success = false;                  \
         return T();                                \
+    } else {                                       \
+        b_decode_success = true;                   \
     }
 
     public:
@@ -57,61 +60,78 @@ namespace msgpack {
         }
 
         template <typename First, typename... Rest>
-        void deserialize(First& first, Rest&&... rest) {
+        bool deserialize(First& first, Rest&&... rest) {
             if (!b_size_matched || indices.empty()) {
                 LOG_WARN(F("correct binary data was not supplied yet"));
-                return;
+                b_decode_success = false;
+                return b_decode_success;
             }
             if (curr_index >= indices.size()) {
                 LOG_ERROR(F("too many args: obj index overflow"));
-                return;
+                b_decode_success = false;
+                return b_decode_success;
             }
-            unpack(first);
-            deserialize(std::forward<Rest>(rest)...);
+            if (!unpack(first)) {
+                return b_decode_success;
+            }
+
+            return deserialize(std::forward<Rest>(rest)...);
         }
 
-        void deserialize() {
-            if (curr_index >= indices.size()) {
-                if (curr_index > indices.size())
-                    LOG_ERROR("index overflow:", curr_index, "must be <=", indices.size());
-                b_size_matched = false;
+        bool deserialize() {
+            if (curr_index > indices.size()) {
+                LOG_ERROR("index overflow:", curr_index, "must be <=", indices.size());
+                b_decode_success = false;
             }
+
+            // do nothing if curr_index is <= indices.size()
+            // - curr_index == indices.size()
+            // - to be decoded after this deserialize()
+
+            return b_decode_success;
         }
 
 #ifdef ARDUINOJSON_VERSION
 
     private:
-        void deserialize_arduinojson(JsonDocument& doc) {
+        bool deserialize_arduinojson(JsonDocument& doc) {
             auto err = deserializeMsgPack(doc, raw_data);
             if (err) {
                 LOG_ERROR("deserializeJson() faled: ", err.c_str());
+                b_decode_success = false;
+            } else {
+                b_decode_success = true;
             }
+            return b_decode_success;
         }
 
     public:
         template <size_t N>
-        void deserialize(StaticJsonDocument<N>& doc) {
-            deserialize_arduinojson(doc);
+        bool deserialize(StaticJsonDocument<N>& doc) {
+            return deserialize_arduinojson(doc);
         }
-        void deserialize(DynamicJsonDocument& doc) {
-            deserialize_arduinojson(doc);
+        bool deserialize(DynamicJsonDocument& doc) {
+            return deserialize_arduinojson(doc);
         }
 
 #endif  // ARDUINOJSON_VERSION
 
         template <typename... Args>
-        void from_array(Args&&... args) {
+        bool from_array(Args&&... args) {
             static arr_size_t sz;
-            deserialize(sz, std::forward<Args>(args)...);
+            return deserialize(sz, std::forward<Args>(args)...);
         }
 
         template <typename... Args>
-        void from_map(Args&&... args) {
+        bool from_map(Args&&... args) {
             if ((sizeof...(args) % 2) == 0) {
                 static map_size_t sz;
-                deserialize(sz, std::forward<Args>(args)...);
-            } else
+                return deserialize(sz, std::forward<Args>(args)...);
+            } else {
                 LOG_ERROR(F("arg size must be even for map:"), sizeof...(args));
+                b_decode_success = false;
+                return b_decode_success;
+            }
         }
 
         template <typename... Ts>
@@ -123,10 +143,15 @@ namespace msgpack {
             size_t i {0};
             idx_t {(unpack(std::get<Is>(t)), i++)...};
         }
-        void to_tuple() {}
+        void to_tuple() {
+            // nothing to do
+        }
 
-        bool available() const {
+        bool decode_ready() const {
             return b_size_matched;
+        }
+        bool decoded() const {
+            return b_decode_success;
         }
         size_t size() const {
             return indices.size();
@@ -141,6 +166,7 @@ namespace msgpack {
             indices.clear();
             index(0);
             b_size_matched = false;
+            b_decode_success = false;
             raw_data = nullptr;
         }
 
@@ -155,16 +181,18 @@ namespace msgpack {
         // - N/A
 
         template <typename T>
-        auto unpack(T& value) -> typename std::enable_if<std::is_same<T, object::nil_t>::value>::type {
+        auto unpack(T& value) -> typename std::enable_if<std::is_same<T, object::nil_t>::value, bool>::type {
             value = unpackNil();
+            return b_decode_success;
         }
 
         // ---------- BOOL format family ----------
         // - bool
 
         template <typename T>
-        auto unpack(T& value) -> typename std::enable_if<std::is_same<T, bool>::value>::type {
+        auto unpack(T& value) -> typename std::enable_if<std::is_same<T, bool>::value, bool>::type {
             value = unpackBool();
+            return b_decode_success;
         }
 
         // ---------- INT format family ----------
@@ -174,15 +202,19 @@ namespace msgpack {
         template <typename T>
         auto unpack(T& value) -> typename std::enable_if<
             std::is_arithmetic<T>::value && std::is_integral<T>::value && !std::is_same<T, bool>::value
-            && !std::is_same<typename std::remove_cv<T>::type, char*>::value && !std::is_signed<T>::value>::type {
+                && !std::is_same<typename std::remove_cv<T>::type, char*>::value && !std::is_signed<T>::value,
+            bool>::type {
             value = unpackUInt<T>();
+            return b_decode_success;
         }
 
         template <typename T>
         auto unpack(T& value) -> typename std::enable_if<
             std::is_arithmetic<T>::value && std::is_integral<T>::value && !std::is_same<T, bool>::value
-            && !std::is_same<typename std::remove_cv<T>::type, char*>::value && std::is_signed<T>::value>::type {
+                && !std::is_same<typename std::remove_cv<T>::type, char*>::value && std::is_signed<T>::value,
+            bool>::type {
             value = unpackInt<T>();
+            return b_decode_success;
         }
 
         // ---------- FLOAT format family ----------
@@ -191,8 +223,9 @@ namespace msgpack {
 
         template <typename T>
         auto unpack(T& value) ->
-            typename std::enable_if<std::is_arithmetic<T>::value && std::is_floating_point<T>::value>::type {
+            typename std::enable_if<std::is_arithmetic<T>::value && std::is_floating_point<T>::value, bool>::type {
             value = unpackFloat<T>();
+            return b_decode_success;
         }
 
         // ---------- STRING format family ----------
@@ -200,8 +233,9 @@ namespace msgpack {
         // - char[]
         // - std::string
 
-        void unpack(str_t& str) {
+        bool unpack(str_t& str) {
             str = unpackString();
+            return b_decode_success;
         }
 
         // ---------- BIN format family ----------
@@ -216,16 +250,18 @@ namespace msgpack {
 
         template <typename T>
         auto unpack(bin_t<T>& bin) ->
-            typename std::enable_if<std::is_same<T, char>::value || std::is_same<T, uint8_t>::value>::type {
+            typename std::enable_if<std::is_same<T, char>::value || std::is_same<T, uint8_t>::value, bool>::type {
             bin = unpackBinary<T>();
+            return b_decode_success;
         }
 
 #else
 
         template <typename T, size_t N>
         auto unpack(arx::vector<T, N>& bin)  // bin_t<T>
-            -> typename std::enable_if<std::is_same<T, char>::value || std::is_same<T, uint8_t>::value>::type {
+            -> typename std::enable_if<std::is_same<T, char>::value || std::is_same<T, uint8_t>::value, bool>::type {
             bin = unpackBinary<T>();
+            return b_decode_success;
         }
 
 #endif  // Do not have libstdc++11
@@ -234,8 +270,9 @@ namespace msgpack {
 
         template <typename T, size_t N>
         auto unpack(std::array<T, N>& bin) ->
-            typename std::enable_if<std::is_same<T, char>::value || std::is_same<T, uint8_t>::value>::type {
+            typename std::enable_if<std::is_same<T, char>::value || std::is_same<T, uint8_t>::value, bool>::type {
             bin = unpackBinary<T, N>();
+            return b_decode_success;
         }
 
 #endif  // Do not have libstdc++11
@@ -257,60 +294,73 @@ namespace msgpack {
 
         template <typename T>
         auto unpack(arr_t<T>& arr) ->
-            typename std::enable_if<!std::is_same<T, char>::value && !std::is_same<T, uint8_t>::value>::type {
+            typename std::enable_if<!std::is_same<T, char>::value && !std::is_same<T, uint8_t>::value, bool>::type {
             unpackArrayContainerArray(arr);
             arr.shrink_to_fit();
+            return b_decode_success;
         }
 
 #if ARX_HAVE_LIBSTDCPLUSPLUS >= 201103L  // Have libstdc++11
 
         template <typename T, size_t N>
         auto unpack(std::array<T, N>& arr) ->
-            typename std::enable_if<!std::is_same<T, char>::value && !std::is_same<T, uint8_t>::value>::type {
+            typename std::enable_if<!std::is_same<T, char>::value && !std::is_same<T, uint8_t>::value, bool>::type {
             const size_t size = unpackArraySize();
             if (N == size)
                 for (auto& a : arr) unpack(a);
-            else
+            else {
                 LOG_ERROR(F("array size mismatch:"), size, F("must be"), N);
+                b_decode_success = false;
+            }
+            return b_decode_success;
         }
 
         template <typename T>
-        void unpack(std::deque<T>& arr) {
+        bool unpack(std::deque<T>& arr) {
             unpackArrayContainerArray(arr);
             arr.shrink_to_fit();
+            return b_decode_success;
         }
 
         template <typename T, typename U>
-        void unpack(std::pair<T, U>& arr) {
+        bool unpack(std::pair<T, U>& arr) {
             const size_t size = unpackArraySize();
             if (size == 2) {
                 unpack(arr.first);
                 unpack(arr.second);
-            } else
+            } else {
                 LOG_ERROR(F("array size mismatch:"), size, F("must be"), 2);
+                b_decode_success = false;
+            }
+            return b_decode_success;
         }
 
         template <typename... Args>
-        void unpack(std::tuple<Args...>& t) {
+        bool unpack(std::tuple<Args...>& t) {
             const size_t size = unpackArraySize();
-            if (sizeof...(Args) == size)
+            if (sizeof...(Args) == size) {
                 to_tuple(t);
-            else
+            } else {
                 LOG_ERROR(F("array size mismatch:"), size, F("must be"), sizeof...(Args));
+                b_decode_success = false;
+            }
+            return b_decode_success;
         }
 
         template <typename T>
-        void unpack(std::list<T>& arr) {
+        bool unpack(std::list<T>& arr) {
             unpackArrayContainerArray(arr);
+            return b_decode_success;
         }
 
         template <typename T>
-        void unpack(std::forward_list<T>& arr) {
+        bool unpack(std::forward_list<T>& arr) {
             const size_t arr_size = std::distance(arr.begin(), arr.end());
             const size_t size = unpackArraySize();
-            if (size == 0)
+            if (size == 0) {
                 LOG_ERROR(F("array size mismatch:"), size, F("must be"), arr_size);
-            else if (arr_size == size)
+                b_decode_success = false;
+            } else if (arr_size == size)
                 for (auto& a : arr) unpack(a);
             else {
                 arr.clear();
@@ -320,26 +370,31 @@ namespace msgpack {
                     arr.emplace_after(std::next(arr.before_begin(), a), t);
                 }
             }
+            return b_decode_success;
         }
 
         template <typename T>
-        void unpack(std::set<T>& arr) {
+        bool unpack(std::set<T>& arr) {
             unpackArrayContainerSet(arr);
+            return b_decode_success;
         }
 
         template <typename T>
-        void unpack(std::multiset<T>& arr) {
+        bool unpack(std::multiset<T>& arr) {
             unpackArrayContainerSet(arr);
+            return b_decode_success;
         }
 
         template <typename T>
-        void unpack(std::unordered_set<T>& arr) {
+        bool unpack(std::unordered_set<T>& arr) {
             unpackArrayContainerSet(arr);
+            return b_decode_success;
         }
 
         template <typename T>
-        void unpack(std::unordered_multiset<T>& arr) {
+        bool unpack(std::unordered_multiset<T>& arr) {
             unpackArrayContainerSet(arr);
+            return b_decode_success;
         }
 
 #endif  // Do not have libstdc++11
@@ -352,56 +407,65 @@ namespace msgpack {
         // * : not supported in arduino
 
         template <typename T, typename U>
-        void unpack(map_t<T, U>& mp) {
+        bool unpack(map_t<T, U>& mp) {
             unpackMapContainer(mp);
+            return b_decode_success;
         }
 
 #if ARX_HAVE_LIBSTDCPLUSPLUS >= 201103L  // Have libstdc++11
 
         template <typename T, typename U>
-        void unpack(std::multimap<T, U>& mp) {
+        bool unpack(std::multimap<T, U>& mp) {
             unpackMapContainer(mp);
+            return b_decode_success;
         }
 
         template <typename T, typename U>
-        void unpack(std::unordered_map<T, U>& mp) {
+        bool unpack(std::unordered_map<T, U>& mp) {
             unpackMapContainer(mp);
+            return b_decode_success;
         }
 
         template <typename T, typename U>
-        void unpack(std::unordered_multimap<T, U>& mp) {
+        bool unpack(std::unordered_multimap<T, U>& mp) {
             unpackMapContainer(mp);
+            return b_decode_success;
         }
 
 #endif  // Do not have libstdc++11
 
         // ---------- EXT format family ----------
 
-        void unpack(object::ext& e) {
+        bool unpack(object::ext& e) {
             e = unpackExt();
+            return b_decode_success;
         }
 
         // ---------- TIMESTAMP format family ----------
 
-        void unpack(object::timespec& t) {
+        bool unpack(object::timespec& t) {
             t = unpackTimestamp();
+            return b_decode_success;
         }
 
         // ---------- CUSTOM format ----------
 
         template <typename C>
-        auto unpack(C& c) -> typename std::enable_if<has_from_msgpack<C, Unpacker&>::value>::type {
+        auto unpack(C& c) -> typename std::enable_if<has_from_msgpack<C, Unpacker&>::value, bool>::type {
             c.from_msgpack(*this);
+            return b_decode_success;
         }
 
         // ---------- Array/Map Size format ----------
 
-        void unpack(arr_size_t& t) {
+        bool unpack(arr_size_t& t) {
             t = arr_size_t(unpackArraySize());
+            return b_decode_success;
         }
 
-        void unpack(map_size_t& t) {
+        bool unpack(map_size_t& t) {
             t = map_size_t(unpackMapSize());
+            return b_decode_success;
         }
 
         /////////////////////////////////////////////////////
@@ -1851,6 +1915,7 @@ namespace msgpack {
                     (int)getType(),
                     F("must be"),
                     (int)type);
+            b_decode_success = false;
             ++curr_index;
             return T();
         }
@@ -1875,9 +1940,10 @@ namespace msgpack {
 #endif  // Do not have libstdc++11
         {
             const size_t size = unpackArraySize();
-            if (size == 0)
+            if (size == 0) {
                 LOG_ERROR(F("array size mismatch:"), size, F("must be"), arr.size());
-            else if (arr.size() == size)
+                b_decode_success = false;
+            } else if (arr.size() == size)
                 for (auto& a : arr) unpack(a);
             else {
                 arr.clear();
@@ -1897,9 +1963,10 @@ namespace msgpack {
 #endif  // Do not have libstdc++11
         {
             const size_t size = unpackArraySize();
-            if (size == 0)
+            if (size == 0) {
                 LOG_ERROR(F("array size mismatch:"), size, F("must be"), arr.size());
-            else {
+                b_decode_success = false;
+            } else {
                 arr.clear();
                 for (size_t a = 0; a < size; ++a) {
                     T t;
@@ -1919,9 +1986,10 @@ namespace msgpack {
             using namespace arx;
 #endif  // Do not have libstdc++11
             const size_t size = unpackMapSize();
-            if (size == 0)
+            if (size == 0) {
                 LOG_ERROR(F("map size mismatch:"), size, F("must be"), mp.size());
-            else {
+                b_decode_success = false;
+            } else {
                 mp.clear();
                 for (size_t a = 0; a < size; ++a) {
                     T t;
