@@ -261,6 +261,36 @@ void setup() {
 }
 ```
 
+## Utilities
+
+### Save/Load to/from EEPROM with MsgPack
+
+In Arduino, you can use the MsgPack utility to save/load to/from EEPROM. Following code shows how to use them. Please see `save_load_eeprom` example for more details.
+
+```C++
+struct MyConfig {
+    Meta meta;
+    Data data;
+    MSGPACK_DEFINE(meta, data);
+};
+
+MyConfig config;
+
+void setup() {
+    EEPROM.begin();
+
+    // load current config
+    MsgPack::eeprom::load(config);
+
+    // change your configuration...
+
+    // save
+    MsgPack::eeprom::save(config);
+
+    EEPROM.end();
+}
+```
+
 ## Supported Type Adaptors
 
 These are the lists of types which can be `serialize` and `deserialize`.
@@ -794,6 +824,23 @@ bool isTimestamp64() const;
 bool isTimestamp96() const;
 bool isTimestamp() const;
 MsgPack::Type getType() const
+```
+
+### MsgPack Utilities
+
+```C++
+template <typename T>
+inline size_t estimate_size(const T& msg);
+
+namespace eeprom {
+    template <typename T>
+    inline void save(const T& value, const size_t index_offset = 0);
+    template <typename T>
+    inline bool load(T& value, const size_t index_offset = 0);
+    template <typename T>
+    inline void clear(const T& value, const size_t index_offset = 0);
+    inline void clear_size(const size_t size, const size_t index_offset = 0);
+}
 ```
 
 ### MsgPack::Type
