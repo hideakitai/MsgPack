@@ -1,4 +1,5 @@
 #define MSGPACK_DEBUGLOG_ENABLE
+#include <EEPROM.h>  // you should include EEPROM.h first
 #include <MsgPack.h>
 
 struct Meta {
@@ -38,7 +39,6 @@ void print_config(const MyConfig& config) {
 
 void setup() {
     Serial.begin(115200);
-    EEPROM.begin();
     delay(2000);
 
     MyConfig config;

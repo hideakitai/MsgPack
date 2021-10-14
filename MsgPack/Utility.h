@@ -6,10 +6,6 @@
 #include "Packer.h"
 #include "Unpacker.h"
 
-#ifdef ARDUINO
-#include <EEPROM.h>
-#endif
-
 namespace arduino {
 namespace msgpack {
 
@@ -20,7 +16,7 @@ namespace msgpack {
         return packer.size();
     }
 
-#ifdef ARDUINO
+#ifdef EEPROM_h
 
     namespace eeprom {
 
@@ -29,6 +25,16 @@ namespace msgpack {
             Packer packer;
             packer.serialize(value);
 
+#if defined(ESP_PLATFORM) || defined(ESP8266)
+            // write size of value
+            EEPROM.write(index_offset, packer.size());
+
+            const uint8_t* data = packer.data();
+            for (size_t i = 0; i < packer.size(); ++i) {
+                EEPROM.write(index_offset + 1 + i, data[i]);  // consider offset of value size
+            }
+            EEPROM.commit();
+#else
             // write size of value
             EEPROM.update(index_offset, packer.size());
 
@@ -36,6 +42,7 @@ namespace msgpack {
             for (size_t i = 0; i < packer.size(); ++i) {
                 EEPROM.update(index_offset + 1 + i, data[i]);  // consider offset of value size
             }
+#endif
         }
 
         template <typename T>
@@ -66,9 +73,16 @@ namespace msgpack {
         }
 
         inline void clear_size(const size_t size, const size_t index_offset = 0) {
+#if defined(ESP_PLATFORM) || defined(ESP8266)
+            for (size_t i = 0; i < size; ++i) {
+                EEPROM.write(index_offset + i, 0xFF);
+            }
+            EEPROM.commit();
+#else
             for (size_t i = 0; i < size; ++i) {
                 EEPROM.update(index_offset + i, 0xFF);
             }
+#endif
         }
 
         template <typename T>
