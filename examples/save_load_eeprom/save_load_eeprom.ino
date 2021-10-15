@@ -41,6 +41,10 @@ void setup() {
     Serial.begin(115200);
     delay(2000);
 
+#if defined(ESP_PLATFORM) || defined(ESP8266)
+    EEPROM.begin(0xFF);  // should set the size of EEPROM
+#endif
+
     MyConfig config;
 
     // load current config
