@@ -21,9 +21,14 @@ namespace msgpack {
     namespace eeprom {
 
         template <typename T>
-        inline void save(const T& value, const size_t index_offset = 0) {
+        inline bool save(const T& value, const size_t index_offset = 0) {
             Packer packer;
             packer.serialize(value);
+
+            if (index_offset + 1 + packer.size() > EEPROM.length()) {  // consider offset of value size
+                LOG_ERROR(F("MsgPack data size + offset is larger the size of EEPROM"));
+                return false;
+            }
 
 #if defined(ESP_PLATFORM) || defined(ESP8266)
             // write size of value
@@ -43,6 +48,7 @@ namespace msgpack {
                 EEPROM.update(index_offset + 1 + i, data[i]);  // consider offset of value size
             }
 #endif
+            return true;
         }
 
         template <typename T>
@@ -93,7 +99,7 @@ namespace msgpack {
 
     }  // namespace eeprom
 
-#endif  // ARDUINO
+#endif  // EEPROM_h
 
 }  // namespace msgpack
 }  // namespace arduino

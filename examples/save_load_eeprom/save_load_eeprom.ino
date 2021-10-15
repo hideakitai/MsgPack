@@ -73,11 +73,13 @@ void setup() {
     config.data.s = String("random ") + random(100, 200);
 
     // save
-    MsgPack::eeprom::save(config);
+    if (!MsgPack::eeprom::save(config)) {
+        Serial.println("[ERROR] Saving configuration to EEPROM failed");
+    }
 
     // load
     if (!MsgPack::eeprom::load(config)) {
-        Serial.println("[ERROR] Saving configuration to EEPROM failed");
+        Serial.println("[ERROR] Loading configuration from EEPROM failed");
     } else {
         Serial.println("Saving configuration to EEPROM success");
         print_config(config);
