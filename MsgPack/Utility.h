@@ -25,10 +25,20 @@ namespace msgpack {
             Packer packer;
             packer.serialize(value);
 
-            if (index_offset + 1 + packer.size() > EEPROM.length()) {  // consider offset of value size
-                LOG_ERROR(F("MsgPack data size + offset is larger the size of EEPROM"));
+            const uint8_t byte_offset = index_offset + 1;  // consider offset of value size
+
+#ifndef ESP_PLATFORM
+            // in esp32, EEPROM.length() always returns 0 due to the bug...
+            if (byte_offset + packer.size() > EEPROM.length()) {
+                LOG_ERROR(
+                    F("MsgPack data size + offset is larger the size of EEPROM:"),
+                    byte_offset + packer.size(),
+                    "should <=",
+                    EEPROM.length());
+
                 return false;
             }
+#endif
 
 #if defined(ESP_PLATFORM) || defined(ESP8266)
             // write size of value
@@ -36,7 +46,7 @@ namespace msgpack {
 
             const uint8_t* data = packer.data();
             for (size_t i = 0; i < packer.size(); ++i) {
-                EEPROM.write(index_offset + 1 + i, data[i]);  // consider offset of value size
+                EEPROM.write(byte_offset + i, data[i]);
             }
             EEPROM.commit();
 #else
@@ -45,7 +55,7 @@ namespace msgpack {
 
             const uint8_t* data = packer.data();
             for (size_t i = 0; i < packer.size(); ++i) {
-                EEPROM.update(index_offset + 1 + i, data[i]);  // consider offset of value size
+                EEPROM.update(byte_offset + i, data[i]);
             }
 #endif
             return true;
