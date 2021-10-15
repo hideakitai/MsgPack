@@ -521,8 +521,9 @@ void serialize(const arr_size_t& arr_size, Args&&... args);
 template <typename ...Args>
 void serialize(const map_size_t& map_size, Args&&... args);
 template <size_t N>
-void serialize(const StaticJsonDocument<N>& doc);
-void serialize(const DynamicJsonDocument& doc);
+void serialize(const StaticJsonDocument<N>& doc, const size_t num_max_string_type = 32);
+void serialize(const DynamicJsonDocument& doc, const size_t num_max_string_type = 32);
+void serialize_arduinojson(const JsonDocument& doc, const size_t num_max_string_type = 32);
 
 // variable sized serializer to array or map for any type
 template <typename ...Args>
@@ -834,7 +835,7 @@ inline size_t estimate_size(const T& msg);
 
 namespace eeprom {
     template <typename T>
-    inline void save(const T& value, const size_t index_offset = 0);
+    inline bool save(const T& value, const size_t index_offset = 0);
     template <typename T>
     inline bool load(T& value, const size_t index_offset = 0);
     template <typename T>
