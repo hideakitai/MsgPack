@@ -65,7 +65,6 @@ namespace msgpack {
             // deserialize data
             Unpacker unpacker;
             if (unpacker.feed(data.data(), data.size())) {
-                Serial.println("size matched!");
                 if (unpacker.deserialize(value)) {
                     return true;
                 } else {
