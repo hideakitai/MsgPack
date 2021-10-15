@@ -73,10 +73,11 @@ namespace msgpack {
             uint8_t* data = new uint8_t[size];
             serializeMsgPack(doc, data, size);
             packRawBytes(data, size);
-            // TODO:
+            // TODO: smarter way to calcurate size of indices?
             Unpacker unpacker;
             unpacker.feed(data, size);
             n_indices += unpacker.size();
+            delete[] data;
         }
 
     public:
