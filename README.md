@@ -7,6 +7,8 @@ MessagePack implementation for Arduino (compatible with other C++ apps)
 - one-line [serialize / deserialize] for almost all standard type of C++ same as [msgpack-c](https://github.com/msgpack/msgpack-c)
 - support custom class [serialization / deserialization]
 - support working with [ArduinoJSON](https://github.com/bblanchon/ArduinoJson)
+- one-line [save / load] between custom serializable MsgPack class and JSON file
+- one-line [save / load] custom serializable MsgPack class [to / from] EEPROM
 
 ## Typical Usage
 
