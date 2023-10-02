@@ -526,11 +526,14 @@ But such libraries are mainly based on [uClibc++](https://cxx.uclibc.org/) and i
 I considered to support them but I won't support them unless uClibc++ becomes much better compatibility to standard C++ library.
 I reccomend to use low cost but much better performance chip like ESP series.
 
+## Dependent Libraries
+
+- [ArxContainer](https://github.com/hideakitai/ArxContainer)
+- [ArxTypeTraits](https://github.com/hideakitai/ArxTypeTraits)
+- [DebugLog](https://github.com/hideakitai/DebugLog)
+
 ## Embedded Libraries
 
-- [ArxTypeTraits v0.2.3](https://github.com/hideakitai/ArxTypeTraits)
-- [ArxContainer v0.4.0](https://github.com/hideakitai/ArxContainer)
-- [DebugLog v0.6.6](https://github.com/hideakitai/DebugLog)
 - [TeensyDirtySTLErrorSolution v0.1.0](https://github.com/hideakitai/TeensyDirtySTLErrorSolution)
 
 ## Used Inside of
