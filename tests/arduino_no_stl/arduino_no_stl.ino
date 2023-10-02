@@ -1,5 +1,7 @@
 #include <Arduino.h>
 
+#if defined(ARDUINO_ARCH_AVR) || defined(ARDUINO_ARCH_MEGAAVR) || defined (ARDUINO_ARCH_SAM) || defined(ARDUINO_ARCH_SAMD)
+
 // #define TEST_BINARY
 
 #ifdef TEST_BINARY
@@ -439,3 +441,10 @@ void setup() {
 
 void loop() {
 }
+
+#else
+
+void setup() {}
+void loop() {}
+
+#endif

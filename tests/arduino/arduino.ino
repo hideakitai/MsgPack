@@ -1,5 +1,13 @@
-#define MSGPACK_DEBUGLOG_ENABLE
 #include <Arduino.h>
+
+#if defined(ARDUINO_ARCH_AVR) || defined(ARDUINO_ARCH_MEGAAVR) || defined (ARDUINO_ARCH_SAM) || defined(ARDUINO_ARCH_SAMD)
+
+void setup() {}
+void loop() {}
+
+#else
+
+#define MSGPACK_DEBUGLOG_ENABLE
 #include <MsgPack.h>
 
 #include <cassert>
@@ -26,9 +34,9 @@ uint16_t intu16 = 12345;
 uint32_t intu32 = 1234567891;
 uint64_t intu64 = 1234567891234567891;
 int8_t int5 = -12;
-int8_t int8 = -123;
+// int8_t int8 = -123;
 int16_t int16 = -12345;
-int32_t int32 = -1234567891;
+// int32_t int32 = -1234567891;
 int64_t int64 = -1234567891234567891;
 
 float f = -12345.6789;
@@ -291,3 +299,5 @@ void setup() {
 
 void loop() {
 }
+
+#endif
