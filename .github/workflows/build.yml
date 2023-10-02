@@ -99,5 +99,5 @@ jobs:
             - examples/simple
             - tests
           libraries: |
-            - source-path: ./
+            - name: MsgPack
           verbose: true

@@ -2,8 +2,8 @@
 #ifndef HT_SERIAL_MSGPACK_UNPACKER_H
 #define HT_SERIAL_MSGPACK_UNPACKER_H
 
-#include "util/ArxTypeTraits/ArxTypeTraits.h"
-#include "util/ArxContainer/ArxContainer.h"
+#include <ArxTypeTraits.h>
+#include <ArxContainer.h>
 #if ARX_HAVE_LIBSTDCPLUSPLUS >= 201103L  // Have libstdc++11
 #include <vector>
 #include <array>
@@ -24,7 +24,7 @@
 #endif  // TEENSYDUINO
 
 #include "Types.h"
-#include "util/DebugLog/DebugLog.h"
+#include <DebugLog.h>
 
 namespace arduino {
 namespace msgpack {

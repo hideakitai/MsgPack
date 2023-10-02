@@ -22,8 +22,8 @@ static constexpr uint8_t INT5 = INT5_TEMP_VALUE;
 #define INT5 INT5
 #endif
 
-#include "util/ArxTypeTraits/ArxTypeTraits.h"
-#include "util/ArxContainer/ArxContainer.h"
+#include <ArxTypeTraits.h>
+#include <ArxContainer.h>
 
 namespace arduino {
 namespace msgpack {
