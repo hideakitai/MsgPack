@@ -16,6 +16,6 @@
 
 namespace MsgPack = arduino::msgpack;
 
-#include "MsgPack/util/DebugLog/DebugLogRestoreState.h"
+#include <DebugLogRestoreState.h>
 
 #endif  // ARDUINOMSGPACK_H
