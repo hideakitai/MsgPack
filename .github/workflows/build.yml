@@ -99,5 +99,8 @@ jobs:
             - examples/simple
             - tests
           libraries: |
-            - name: MsgPack
+            - source-path: ./
+            - name: ArxContainer
+            - name: ArxTypeTraits
+            - name: DebugLog
           verbose: true
