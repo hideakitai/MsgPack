@@ -258,7 +258,7 @@ namespace msgpack {
 #else
 
         template <typename T, size_t N>
-        auto unpack(arx::vector<T, N>& bin)  // bin_t<T>
+        auto unpack(arx::stdx::vector<T, N>& bin)  // bin_t<T>
             -> typename std::enable_if<std::is_same<T, char>::value || std::is_same<T, uint8_t>::value, bool>::type {
             bin = unpackBinary<T>();
             return b_decode_success;
@@ -1979,11 +1979,9 @@ namespace msgpack {
 #if ARX_HAVE_LIBSTDCPLUSPLUS >= 201103L  // Have libstdc++11
         template <template <typename...> class C, class T, class U>
         void unpackMapContainer(C<T, U>& mp) {
-            using namespace std;
 #else   // Do not have libstdc++11
         template <typename T, typename U>
         void unpackMapContainer(map_t<T, U>& mp) {
-            using namespace arx;
 #endif  // Do not have libstdc++11
             const size_t size = unpackMapSize();
             if (size == 0) {
