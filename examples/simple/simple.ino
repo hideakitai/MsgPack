@@ -20,9 +20,9 @@ MsgPack::map_t<String, float> rm;
 // MsgPack::map_t -> std::map
 // MsgPack::bin_t -> std::vector<uint8_t> or <char>
 // for NO-STL boards:
-// MsgPack::arr_t -> arx::vector
-// MsgPack::map_t -> arx::map
-// MsgPack::bin_t -> arx::vector<uint8_t> or <char>
+// MsgPack::arr_t -> arx::stdx::vector
+// MsgPack::map_t -> arx::stdx::map
+// MsgPack::bin_t -> arx::stdx::vector<uint8_t> or <char>
 
 void setup() {
     Serial.begin(115200);

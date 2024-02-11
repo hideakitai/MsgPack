@@ -22,8 +22,8 @@ To send / receive serialized data with `Stream` class, please use [MsgPacketizer
 int i = 123;
 float f = 1.23;
 MsgPack::str_t s = "str"; // std::string or String
-MsgPack::arr_t<int> v {1, 2, 3}; // std::vector or arx::vector
-MsgPack::map_t<String, float> m {{"one", 1.1}, {"two", 2.2}, {"three", 3.3}}; // std::map or arx::map
+MsgPack::arr_t<int> v {1, 2, 3}; // std::vector or arx::stdx::vector
+MsgPack::map_t<String, float> m {{"one", 1.1}, {"two", 2.2}, {"three", 3.3}}; // std::map or arx::stdx::map
 
 // output from msgpack
 int ri;
@@ -403,9 +403,9 @@ You can also `pack()` or `unpack()` variable one by one.
 - C-style array and pointers are supported only packing.
 - for NO-STL Arduino, following types can be used
   - all types of NIL, Bool, Integer, Float, Str, Bin
-  - for Array, only `T[]`, `MsgPack::arr_t<T>` (`arx::vector<T>`), and `MsgPack::fix_arr_t<T, N>` (`arx::array<T, N>`) can be used
-  - for Map, only `MsgPack::map_t<T, U>` (`arx::map<T, U>`) can be used
-  - for the detail of `arx::xxx`, see [ArxContainer](https://github.com/hideakitai/ArxContainer)
+  - for Array, only `T[]`, `MsgPack::arr_t<T>` (`arx::stdx::vector<T>`), and `MsgPack::fix_arr_t<T, N>` (`arx::stdx::array<T, N>`) can be used
+  - for Map, only `MsgPack::map_t<T, U>` (`arx::stdx::map<T, U>`) can be used
+  - for the detail of `arx::stdx::xxx`, see [ArxContainer](https://github.com/hideakitai/ArxContainer)
 
 ### Additional Types for MsgPack
 
@@ -513,9 +513,9 @@ These macros have no effect for STL enabled boards.
 In addtion for such boards, type aliases for following types are different from others.
 
 - `MsgPack::str_t` = `String`
-- `MsgPack::bin_t<T>` = `arx::vector<T, N = MSGPACK_MAX_PACKET_BYTE_SIZE>`
-- `MsgPack::arr_t<T>` = `arx::vector<T, N = MSGPACK_MAX_ARRAY_SIZE>`
-- `MsgPack::map_t<T, U>` = `arx::map<T, U, N = MSGPACK_MAX_MAP_SIZE>`
+- `MsgPack::bin_t<T>` = `arx::stdx::vector<T, N = MSGPACK_MAX_PACKET_BYTE_SIZE>`
+- `MsgPack::arr_t<T>` = `arx::stdx::vector<T, N = MSGPACK_MAX_ARRAY_SIZE>`
+- `MsgPack::map_t<T, U>` = `arx::stdx::map<T, U, N = MSGPACK_MAX_MAP_SIZE>`
 
 Please see "Memory Management" section and [ArxContainer](https://github.com/hideakitai/ArxContainer) for detail.
 

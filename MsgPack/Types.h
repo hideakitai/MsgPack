@@ -57,16 +57,15 @@ namespace msgpack {
 #define MSGPACK_MAX_OBJECT_SIZE 32
 #endif  // MSGPACK_MAX_OBJECT_SIZE
 
-    using idx_t = arx::vector<size_t, MSGPACK_MAX_OBJECT_SIZE>;
+    using idx_t = arx::stdx::vector<size_t, MSGPACK_MAX_OBJECT_SIZE>;
     template <typename T, size_t N = MSGPACK_MAX_ARRAY_SIZE>
-    using arr_t = arx::vector<T, N>;
+    using arr_t = arx::stdx::vector<T, N>;
     template <typename T, size_t N>
-    using fix_arr_t = arx::array<T, N>;
+    using fix_arr_t = arx::stdx::array<T, N>;
     template <typename T, typename U, size_t N = MSGPACK_MAX_MAP_SIZE>
-    using map_t = arx::map<T, U, N>;
+    using map_t = arx::stdx::map<T, U, N>;
     template <typename T, size_t N = MSGPACK_MAX_PACKET_BYTE_SIZE>
-    using bin_t = arx::
-        vector<typename std::enable_if<std::is_same<T, uint8_t>::value || std::is_same<T, char>::value, T>::type, N>;
+    using bin_t = arx::stdx::vector<typename std::enable_if<std::is_same<T, uint8_t>::value || std::is_same<T, char>::value, T>::type, N>;
 
 #endif  // Do not have libstdc++11
 
