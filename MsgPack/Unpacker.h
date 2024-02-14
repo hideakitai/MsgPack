@@ -1994,7 +1994,7 @@ namespace msgpack {
                     U u;
                     unpack(t);
                     unpack(u);
-                    mp.emplace(make_pair(t, u));
+                    mp.emplace(std::make_pair(t, u));
                 }
             }
         }
