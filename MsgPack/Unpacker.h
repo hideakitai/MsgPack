@@ -31,6 +31,7 @@ namespace msgpack {
 
     class Unpacker {
         uint8_t* raw_data {nullptr};
+        size_t raw_size {0};
         idx_t indices;
         size_t curr_index {0};
         bool b_size_matched {false};
@@ -52,10 +53,18 @@ namespace msgpack {
 
         bool feed(const uint8_t* data, const size_t size) {
             raw_data = (uint8_t*)data;
-            for (size_t i = 0; i < size; i += getElementSize(indices.size() - 1)) indices.emplace_back(i);
-            const size_t decoded_size = indices.back() + getElementSize(indices.size() - 1);
-            b_size_matched = (size == decoded_size);
-            if (!b_size_matched) LOG_ERROR(F("decoded binary size"), decoded_size, F("not matched to"), size);
+            raw_size = size;
+            indices.clear();
+            curr_index = 0;
+            b_size_matched = false;
+            if (!data || !size) return false;
+            for (size_t i = 0; i < size;) {
+                indices.emplace_back(i);
+                const size_t element_size = getElementSize(indices.size() - 1);
+                if (!element_size || element_size > size - i) return false;
+                i += element_size;
+            }
+            b_size_matched = true;
             return b_size_matched;
         }
 
@@ -168,6 +177,7 @@ namespace msgpack {
             b_size_matched = false;
             b_decode_success = false;
             raw_data = nullptr;
+            raw_size = 0;
         }
 
         /////////////////////////////////////////////////
@@ -1231,8 +1241,9 @@ namespace msgpack {
         template <typename T, size_t N>
         auto unpackBinaryUnchecked8() -> typename std::
             enable_if<std::is_same<T, char>::value || std::is_same<T, uint8_t>::value, std::array<T, N>>::type {
-            std::array<T, N> data;
+            std::array<T, N> data{};
             uint8_t size = getRawBytes<uint8_t>(curr_index, 1);
+            if (size > N) { b_decode_success = false; return {}; }
             for (uint8_t v = 0; v < size; ++v) data[v] = getRawBytes<T>(curr_index, v + 1 + sizeof(uint8_t));
             ++curr_index;
             return data;
@@ -1241,8 +1252,9 @@ namespace msgpack {
         template <typename T, size_t N>
         auto unpackBinaryUnchecked16() -> typename std::
             enable_if<std::is_same<T, char>::value || std::is_same<T, uint8_t>::value, std::array<T, N>>::type {
-            std::array<T, N> data;
+            std::array<T, N> data{};
             uint16_t size = getRawBytes<uint16_t>(curr_index, 1);
+            if (size > N) { b_decode_success = false; return {}; }
             for (uint16_t v = 0; v < size; ++v) data[v] = getRawBytes<T>(curr_index, v + 1 + sizeof(uint16_t));
             ++curr_index;
             return data;
@@ -1251,8 +1263,9 @@ namespace msgpack {
         template <typename T, size_t N>
         auto unpackBinaryUnchecked32() -> typename std::
             enable_if<std::is_same<T, char>::value || std::is_same<T, uint8_t>::value, std::array<T, N>>::type {
-            std::array<T, N> data;
+            std::array<T, N> data{};
             uint32_t size = getRawBytes<uint32_t>(curr_index, 1);
+            if (size > N) { b_decode_success = false; return {}; }
             for (uint32_t v = 0; v < size; ++v) data[v] = getRawBytes<T>(curr_index, v + 1 + sizeof(uint32_t));
             ++curr_index;
             return data;
@@ -1791,7 +1804,9 @@ namespace msgpack {
     private:
         template <typename DataType>
         DataType getRawBytes(const size_t idx, const size_t offset) const {
-            if (idx >= indices.size()) {
+            if (idx >= indices.size() || indices[idx] > raw_size ||
+                offset > raw_size - indices[idx] ||
+                sizeof(DataType) > raw_size - indices[idx] - offset) {
                 LOG_ERROR(F("index overrun: idx"), idx, F("must be <"), indices.size());
                 return DataType();
             }
@@ -1806,7 +1821,8 @@ namespace msgpack {
         }
 
         uint8_t* getRawBytePtr(const size_t idx, const size_t offset) const {
-            if (idx >= indices.size()) {
+            if (idx >= indices.size() || indices[idx] > raw_size ||
+                offset >= raw_size - indices[idx]) {
                 LOG_ERROR(F("index overrun: idx"), idx, F("must be <"), indices.size());
                 return nullptr;
             }
@@ -1839,6 +1855,13 @@ namespace msgpack {
                 return (Type)raw;
             else
                 return Type::INT5;
+        }
+
+        size_t boundedElementSize(size_t i, size_t header, size_t body) const {
+            if (i >= indices.size() || indices[i] > raw_size ||
+                header > raw_size - indices[i] ||
+                body > raw_size - indices[i] - header) return 0;
+            return header + body;
         }
 
         size_t getElementSize(size_t i) const {
@@ -1881,22 +1904,22 @@ namespace msgpack {
                 case Type::FIXEXT16:
                     return 18;
                 case Type::STR5:
-                    return (getRawBytes<uint8_t>(i, 0) & (uint8_t)BitMask::STR5) + 1;
+                    return boundedElementSize(i, 1, getRawBytes<uint8_t>(i, 0) & (uint8_t)BitMask::STR5);
                 case Type::STR8:
                 case Type::BIN8:
-                    return getRawBytes<uint8_t>(i, 1) + sizeof(uint8_t) + 1;
+                    return boundedElementSize(i, 2, getRawBytes<uint8_t>(i, 1));
                 case Type::STR16:
                 case Type::BIN16:
-                    return (size_t)getRawBytes<uint16_t>(i, 1) + sizeof(uint16_t) + 1;
+                    return boundedElementSize(i, 3, getRawBytes<uint16_t>(i, 1));
                 case Type::STR32:
                 case Type::BIN32:
-                    return (size_t)getRawBytes<uint32_t>(i, 1) + sizeof(uint32_t) + 1;
+                    return boundedElementSize(i, 5, getRawBytes<uint32_t>(i, 1));
                 case Type::EXT8:  // includes case Type::TIMESTAMP96:
-                    return (size_t)getRawBytes<uint8_t>(i, 1) + sizeof(uint8_t) + 1 + 1;
+                    return boundedElementSize(i, 3, getRawBytes<uint8_t>(i, 1));
                 case Type::EXT16:
-                    return (size_t)getRawBytes<uint16_t>(i, 1) + sizeof(uint16_t) + 1 + 1;
+                    return boundedElementSize(i, 4, getRawBytes<uint16_t>(i, 1));
                 case Type::EXT32:
-                    return (size_t)getRawBytes<uint32_t>(i, 1) + sizeof(uint32_t) + 1 + 1;
+                    return boundedElementSize(i, 6, getRawBytes<uint32_t>(i, 1));
                 default:
                     LOG_ERROR(F("undefined type:"), (int)type);
                     return 0;
